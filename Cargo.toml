@@ -81,7 +81,11 @@ pcre2 = ["grep/pcre2"]
 unstable-index = ["dep:grep-index"]
 
 [profile.release]
-debug = 1
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
 
 [profile.release-lto]
 inherits = "release"
