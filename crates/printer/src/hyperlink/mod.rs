@@ -763,121 +763,8 @@ impl HyperlinkPath {
         Some(HyperlinkPath::encode(bytes))
     }
 
-    /// Returns a hyperlink path from an OS path.
-    #[cfg(windows)]
-    pub(crate) fn from_path(original_path: &Path) -> Option<HyperlinkPath> {
-        // On Windows, we use `std::path::absolute` instead of `Path::canonicalize`
-        // as it can be much faster since it does not touch the file system.
-        // It wraps the [`GetFullPathNameW`][1] API, except for verbatim paths
-        // (those which start with `\\?\`, see [the documentation][2] for details).
-        //
-        // Here, we strip any verbatim path prefixes since we cannot use them
-        // in hyperlinks anyway. This can only happen if the user explicitly
-        // supplies a verbatim path as input, which already needs to be absolute:
-        //
-        //   \\?\C:\dir\file.txt           (local path)
-        //   \\?\UNC\server\dir\file.txt   (network share)
-        //
-        // The `\\?\` prefix is constant for verbatim paths, and can be followed
-        // by `UNC\` (universal naming convention), which denotes a network share.
-        //
-        // Given that the default URL format on Windows is file://{path}
-        // we need to return the following from this function:
-        //
-        //   /C:/dir/file.txt        (local path)
-        //   //server/dir/file.txt   (network share)
-        //
-        // Which produces the following links:
-        //
-        //   file:///C:/dir/file.txt        (local path)
-        //   file:////server/dir/file.txt   (network share)
-        //
-        // This substitutes the {path} variable with the expected value for
-        // the most common DOS paths, but on the other hand, network paths
-        // start with a single slash, which may be unexpected. It seems to work
-        // though?
-        //
-        // Note that the following URL syntax also seems to be valid?
-        //
-        //   file://server/dir/file.txt
-        //
-        // But the initial implementation of this routine went for the format
-        // above.
-        //
-        // Also note that the file://C:/dir/file.txt syntax is not correct,
-        // even though it often works in practice.
-        //
-        // In the end, this choice was confirmed by VSCode, whose format is
-        //
-        //   vscode://file{path}:{line}:{column}
-        //
-        // and which correctly understands the following URL format for network
-        // drives:
-        //
-        //   vscode://file//server/dir/file.txt:1:1
-        //
-        // It doesn't parse any other number of slashes in "file//server" as a
-        // network path.
-        //
-        // [1]: https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew
-        // [2]: https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
-
-        const WIN32_NAMESPACE_PREFIX: &str = r"\\?\";
-        const UNC_PREFIX: &str = r"UNC\";
-
-        let path = match std::path::absolute(original_path) {
-            Ok(path) => path,
-            Err(err) => {
-                log::debug!(
-                    "hyperlink creation for {:?} failed, error occurred \
-                     during conversion to absolute path: {}",
-                    original_path,
-                    err,
-                );
-                return None;
-            }
-        };
-        // We convert the path to a string for easier manipulation. If it
-        // wasn't valid UTF-16 (and thus could not be non-lossily transcoded
-        // to UTF-8), then we just give up. It's not clear we could make
-        // a meaningful hyperlink from it anyway. And this should be an
-        // exceptionally rare case.
-        let mut string = match path.to_str() {
-            Some(string) => string,
-            None => {
-                log::debug!(
-                    "hyperlink creation for {:?} failed, path is not \
-                     valid UTF-8",
-                    original_path,
-                );
-                return None;
-            }
-        };
-
-        // Strip verbatim path prefixes (see the comment above for details).
-        if string.starts_with(WIN32_NAMESPACE_PREFIX) {
-            string = &string[WIN32_NAMESPACE_PREFIX.len()..];
-
-            // Drop the UNC prefix if there is one, but keep the leading slash.
-            if string.starts_with(UNC_PREFIX) {
-                string = &string[(UNC_PREFIX.len() - 1)..];
-            }
-        } else if string.starts_with(r"\\") || string.starts_with(r"//") {
-            // Drop one of the two leading slashes of network paths, it will be added back.
-            string = &string[1..];
-        }
-
-        // Finally, add a leading slash. In the local file case, this turns
-        // C:\foo\bar into /C:\foo\bar (and then percent encoding turns it into
-        // /C:/foo/bar). In the network share case, this turns \share\foo\bar
-        // into /\share/foo/bar (and then percent encoding turns it into
-        // //share/foo/bar).
-        let with_slash = format!("/{string}");
-        Some(HyperlinkPath::encode(with_slash.as_bytes()))
-    }
-
-    /// For other platforms (not windows, not unix), return None and log a debug message.
-    #[cfg(not(any(windows, unix)))]
+    /// For other platforms (not unix), return None and log a debug message.
+    #[cfg(not(unix))]
     pub(crate) fn from_path(original_path: &Path) -> Option<HyperlinkPath> {
         log::debug!("hyperlinks are not supported on this platform");
         None
@@ -888,13 +775,11 @@ impl HyperlinkPath {
     /// The alphanumeric ASCII characters and "-", ".", "_", "~" are unreserved
     /// as per section 2.3 of RFC 3986 (Uniform Resource Identifier (URI):
     /// Generic Syntax), and are not encoded. The other ASCII characters except
-    /// "/" and ":" are percent-encoded, and "\" is replaced by "/" on Windows.
+    /// "/" and ":" are percent-encoded.
     ///
     /// Section 4 of RFC 8089 (The "file" URI Scheme) does not mandate precise
     /// encoding requirements for non-ASCII characters, and this implementation
-    /// leaves them unencoded. On Windows, the UrlCreateFromPathW function does
-    /// not encode non-ASCII characters. Doing so with UTF-8 encoded paths
-    /// creates invalid file:// URLs on that platform.
+    /// leaves them unencoded.
     fn encode(input: &[u8]) -> HyperlinkPath {
         let mut result = Vec::with_capacity(input.len());
         for &byte in input.iter() {
@@ -910,10 +795,6 @@ impl HyperlinkPath {
                 | b'~'
                 | 128.. => {
                     result.push(byte);
-                }
-                #[cfg(windows)]
-                b'\\' => {
-                    result.push(b'/');
                 }
                 _ => {
                     const HEX: &[u8] = b"0123456789ABCDEF";
@@ -1089,35 +970,6 @@ mod tests {
         assert_eq!(
             HyperlinkFormat::from_str("foo://{bar{{}").unwrap_err(),
             err(InvalidVariable("bar{{".to_string())),
-        );
-    }
-
-    #[test]
-    #[cfg(windows)]
-    fn convert_to_hyperlink_path() {
-        let convert = |path| {
-            String::from_utf8(
-                HyperlinkPath::from_path(Path::new(path)).unwrap().0,
-            )
-            .unwrap()
-        };
-
-        assert_eq!(convert(r"C:\dir\file.txt"), "/C:/dir/file.txt");
-        assert_eq!(
-            convert(r"C:\foo\bar\..\other\baz.txt"),
-            "/C:/foo/other/baz.txt"
-        );
-
-        assert_eq!(convert(r"\\server\dir\file.txt"), "//server/dir/file.txt");
-        assert_eq!(
-            convert(r"\\server\dir\foo\..\other\file.txt"),
-            "//server/dir/other/file.txt"
-        );
-
-        assert_eq!(convert(r"\\?\C:\dir\file.txt"), "/C:/dir/file.txt");
-        assert_eq!(
-            convert(r"\\?\UNC\server\dir\file.txt"),
-            "//server/dir/file.txt"
         );
     }
 

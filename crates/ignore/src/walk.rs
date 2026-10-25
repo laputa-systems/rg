@@ -249,10 +249,6 @@ struct DirEntryRaw {
     /// The underlying inode number (Unix only).
     #[cfg(unix)]
     ino: u64,
-    /// The underlying metadata (Windows only). We store this on Windows
-    /// because this comes for free while reading a directory.
-    #[cfg(windows)]
-    metadata: fs::Metadata,
 }
 
 impl std::fmt::Debug for DirEntryRaw {
@@ -285,17 +281,6 @@ impl DirEntryRaw {
         self.metadata_internal()
     }
 
-    #[cfg(windows)]
-    fn metadata_internal(&self) -> Result<fs::Metadata, Error> {
-        if self.follow_link {
-            fs::metadata(&self.path)
-        } else {
-            Ok(self.metadata.clone())
-        }
-        .map_err(|err| Error::Io(io::Error::from(err)).with_path(&self.path))
-    }
-
-    #[cfg(not(windows))]
     fn metadata_internal(&self) -> Result<fs::Metadata, Error> {
         if self.follow_link {
             fs::metadata(&self.path)
@@ -335,25 +320,6 @@ impl DirEntryRaw {
         DirEntryRaw::from_entry_os(depth, ent, ty)
     }
 
-    #[cfg(windows)]
-    fn from_entry_os(
-        depth: usize,
-        ent: &fs::DirEntry,
-        ty: fs::FileType,
-    ) -> Result<DirEntryRaw, Error> {
-        let md = ent.metadata().map_err(|err| {
-            let err = Error::Io(err).with_depth(depth).with_path(ent.path());
-            Error::WithDepth { depth, err: Box::new(err) }
-        })?;
-        Ok(DirEntryRaw {
-            path: ent.path(),
-            ty,
-            follow_link: false,
-            depth,
-            metadata: md,
-        })
-    }
-
     #[cfg(unix)]
     fn from_entry_os(
         depth: usize,
@@ -373,7 +339,7 @@ impl DirEntryRaw {
 
     // Placeholder implementation to allow compiling on non-standard platforms
     // (e.g. wasm32).
-    #[cfg(not(any(windows, unix)))]
+    #[cfg(not(unix))]
     fn from_entry_os(
         depth: usize,
         ent: &fs::DirEntry,
@@ -383,23 +349,6 @@ impl DirEntryRaw {
             io::ErrorKind::Other,
             "unsupported platform",
         )))
-    }
-
-    #[cfg(windows)]
-    fn from_path(
-        depth: usize,
-        pb: PathBuf,
-        link: bool,
-    ) -> Result<DirEntryRaw, Error> {
-        let md = fs::metadata(&pb)
-            .map_err(|err| Error::Io(err).with_depth(depth).with_path(&pb))?;
-        Ok(DirEntryRaw {
-            path: pb,
-            ty: md.file_type(),
-            follow_link: link,
-            depth,
-            metadata: md,
-        })
     }
 
     #[cfg(unix)]
@@ -423,7 +372,7 @@ impl DirEntryRaw {
 
     // Placeholder implementation to allow compiling on non-standard platforms
     // (e.g. wasm32).
-    #[cfg(not(any(windows, unix)))]
+    #[cfg(not(unix))]
     fn from_path(
         depth: usize,
         pb: PathBuf,
@@ -1002,7 +951,7 @@ impl WalkBuilder {
     /// When this option is enabled, directory traversal will not descend into
     /// directories that are on a different file system from the root path.
     ///
-    /// Currently, this option is only supported on Unix and Windows. If this
+    /// Currently, this option is only supported on Unix. If this
     /// option is used on an unsupported platform, then directory traversal
     /// will immediately return an error and will not yield any entries.
     pub fn same_file_system(&mut self, yes: bool) -> &mut WalkBuilder {
@@ -2174,15 +2123,7 @@ fn device_num<P: AsRef<Path>>(path: P) -> io::Result<u64> {
     path.as_ref().metadata().map(|md| md.dev())
 }
 
-#[cfg(windows)]
-fn device_num<P: AsRef<Path>>(path: P) -> io::Result<u64> {
-    use winapi_util::{Handle, file};
-
-    let h = Handle::from_path_any(path)?;
-    file::information(h).map(|info| info.volume_serial_number())
-}
-
-#[cfg(not(any(unix, windows)))]
+#[cfg(not(unix))]
 fn device_num<P: AsRef<Path>>(_: P) -> io::Result<u64> {
     Err(io::Error::new(
         io::ErrorKind::Other,
@@ -2222,7 +2163,7 @@ mod tests {
     }
 
     fn normal_path(unix: &str) -> String {
-        if cfg!(windows) { unix.replace("\\", "/") } else { unix.to_string() }
+        unix.to_string()
     }
 
     fn walk_collect(prefix: &Path, builder: &WalkBuilder) -> Vec<String> {
@@ -2394,6 +2335,41 @@ mod tests {
             td.path(),
             &builder,
             &[".not-an-ignore", "bar", "a", "a/bar"],
+        );
+    }
+
+    // Names that start with a `.` are hidden, even when they also end in a
+    // `.`. A trailing `.` must not be confused with a `.` or `..` component.
+    //
+    // Windows doesn't allow file names that end in a `.`.
+    #[cfg(unix)]
+    #[test]
+    fn hidden_with_trailing_dot() {
+        let td = tmpdir();
+        wfile(td.path().join("visible."), "");
+        wfile(td.path().join(".hidden"), "");
+        wfile(td.path().join(".hidden."), "");
+        wfile(td.path().join(".hidden.."), "");
+        wfile(td.path().join("..."), "");
+        mkdirp(td.path().join(".dir."));
+        wfile(td.path().join(".dir./inner"), "");
+
+        assert_paths(td.path(), &WalkBuilder::new(td.path()), &["visible."]);
+
+        let mut builder = WalkBuilder::new(td.path());
+        builder.hidden(false);
+        assert_paths(
+            td.path(),
+            &builder,
+            &[
+                ".dir.",
+                ".dir./inner",
+                ".hidden",
+                ".hidden.",
+                ".hidden..",
+                "...",
+                "visible.",
+            ],
         );
     }
 

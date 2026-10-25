@@ -3,7 +3,7 @@ grep-cli
 A utility library that provides common routines desired in search oriented
 command line applications. This includes, but is not limited to, parsing hex
 escapes, detecting whether stdin is readable and more. To the extent possible,
-this crate strives for compatibility across Windows, macOS and Linux.
+this crate strives for compatibility across macOS and Linux.
 
 [![Build status](https://github.com/BurntSushi/ripgrep/workflows/ci/badge.svg)](https://github.com/BurntSushi/ripgrep/actions)
 [![](https://img.shields.io/crates/v/grep-cli.svg)](https://crates.io/crates/grep-cli)

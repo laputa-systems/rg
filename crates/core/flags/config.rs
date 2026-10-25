@@ -158,7 +158,7 @@ baz
         );
     }
 
-    // ... but test that invalid UTF-8 fails on Windows.
+    // ... but test that invalid UTF-8 fails on non-Unix.
     #[test]
     #[cfg(not(unix))]
     fn error() {

@@ -1,5 +1,7 @@
 ## User Guide
 
+**Note: Windows is not supported.**
+
 This guide is intended to give an elementary description of ripgrep and an
 overview of its capabilities. This guide assumes that ripgrep is
 [installed](README.md#installation)
@@ -248,7 +250,7 @@ will be processed with respect to the directory it resides in, just like
 
 To process `.gitignore` and `.ignore` files case insensitively, use the flag
 `--ignore-file-case-insensitive`. This is especially useful on case insensitive
-file systems like those on Windows and macOS. Note though that this can come
+file systems like those on macOS. Note though that this can come
 with a significant performance penalty, and is therefore disabled by default.
 
 For a more in depth description of how glob patterns in a `.gitignore` file
@@ -636,7 +638,8 @@ topic, but we can try to summarize its relevancy to ripgrep:
   pattern or the file to the same encoding as the other.
 * ripgrep tends to work best on plain text files, and among plain text files,
   the most popular encodings likely consist of ASCII, latin1 or UTF-8. As
-  a special exception, UTF-16 is prevalent in Windows environments
+  a special exception, UTF-16 files are also automatically detected via BOM
+  sniffing
 
 In light of the above, here is how ripgrep behaves when `--encoding auto` is
 given, which is the default:

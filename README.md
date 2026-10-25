@@ -4,7 +4,7 @@ ripgrep is a line-oriented search tool that recursively searches the current
 directory for a regex pattern. By default, ripgrep will respect gitignore rules
 and automatically skip hidden files/directories and binary files. (To disable
 all automatic filtering by default, use `rg -uuu`.) ripgrep has first class
-support on Windows, macOS and Linux, with binary downloads available for [every
+support on macOS and Linux, with binary downloads available for [every
 release](https://github.com/BurntSushi/ripgrep/releases). ripgrep is similar to
 other popular search tools like The Silver Searcher, ack and grep.
 
@@ -169,8 +169,8 @@ backreference support.
 At this point, the primary reasons not to use ripgrep probably consist of one
 or more of the following:
 
-* You need a portable and ubiquitous tool. While ripgrep works on Windows,
-  macOS and Linux, it is not ubiquitous and it does not conform to any
+* You need a portable and ubiquitous tool. While ripgrep works on macOS
+  and Linux, it is not ubiquitous and it does not conform to any
   standard such as POSIX. The best tool for this job is good old grep.
 * There still exists some other feature (or bug) not listed in this README that
   you rely on that's in another tool that isn't in ripgrep.
@@ -234,10 +234,12 @@ repo](https://github.com/nalgeon/tryxinyminutes).
 
 The binary name for ripgrep is `rg`.
 
-**[Archives of precompiled binaries for ripgrep are available for Windows,
-macOS and Linux.](https://github.com/BurntSushi/ripgrep/releases)** Linux and
-Windows binaries are static executables. Users of platforms not explicitly
+**[Archives of precompiled binaries for ripgrep are available for macOS
+and Linux.](https://github.com/BurntSushi/ripgrep/releases)** Linux
+binaries are static executables. Users of platforms not explicitly
 mentioned below are advised to download one of these archives.
+
+Windows is not supported.
 
 If you're a **macOS Homebrew** or a **Linuxbrew** user, then you can install
 ripgrep from homebrew-core:
@@ -253,27 +255,8 @@ If you're a **MacPorts** user, then you can install ripgrep from the
 $ sudo port install ripgrep
 ```
 
-If you're a **Windows Chocolatey** user, then you can install ripgrep from the
-[official repo](https://chocolatey.org/packages/ripgrep):
-
-```
-$ choco install ripgrep
-```
-
-If you're a **Windows Scoop** user, then you can install ripgrep from the
-[official bucket](https://github.com/ScoopInstaller/Main/blob/master/bucket/ripgrep.json):
-
-```
-$ scoop install ripgrep
-```
-
-If you're a **Windows Winget** user, then you can install ripgrep from the
-[winget-pkgs](https://github.com/microsoft/winget-pkgs/tree/master/manifests/b/BurntSushi/ripgrep)
-repository:
-
-```
-$ winget install BurntSushi.ripgrep.MSVC
-```
+Windows is not supported. There are no Chocolatey, Scoop or Winget
+installation methods.
 
 If you're an **Arch Linux** user, then you can install ripgrep from the official repos:
 

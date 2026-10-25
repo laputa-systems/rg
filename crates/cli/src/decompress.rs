@@ -86,13 +86,10 @@ impl DecompressionMatcherBuilder {
     /// The syntax for the glob is documented in the
     /// [`globset` crate](https://docs.rs/globset/#syntax).
     ///
-    /// The `program` given is resolved with respect to `PATH` and turned
-    /// into an absolute path internally before being executed by the current
-    /// platform. Notably, on Windows, this avoids a security problem where
-    /// passing a relative path to `CreateProcess` will automatically search
-    /// the current directory for a matching program. If the program could
-    /// not be resolved, then it is silently ignored and the association is
-    /// dropped. For this reason, callers should prefer `try_associate`.
+    /// The `program` given is used as-is when executing the decompression
+    /// command. If the program could not be resolved, then it is silently
+    /// ignored and the association is dropped. For this reason, callers
+    /// should prefer `try_associate`.
     pub fn associate<P, I, A>(
         &mut self,
         glob: &str,
@@ -116,12 +113,9 @@ impl DecompressionMatcherBuilder {
     /// The syntax for the glob is documented in the
     /// [`globset` crate](https://docs.rs/globset/#syntax).
     ///
-    /// The `program` given is resolved with respect to `PATH` and turned
-    /// into an absolute path internally before being executed by the current
-    /// platform. Notably, on Windows, this avoids a security problem where
-    /// passing a relative path to `CreateProcess` will automatically search
-    /// the current directory for a matching program. If the program could not
-    /// be resolved, then an error is returned.
+    /// The `program` given is used as-is when executing the decompression
+    /// command. If the program could not be resolved, then an error is
+    /// returned.
     pub fn try_associate<P, I, A>(
         &mut self,
         glob: &str,
@@ -134,7 +128,7 @@ impl DecompressionMatcherBuilder {
         A: AsRef<OsStr>,
     {
         let glob = glob.to_string();
-        let bin = try_resolve_binary(Path::new(program.as_ref()))?;
+        let bin = resolve_binary(Path::new(program.as_ref()))?;
         let args =
             args.into_iter().map(|a| a.as_ref().to_os_string()).collect();
         self.commands.push(DecompressionCommand { glob, bin, args });
@@ -397,94 +391,14 @@ impl io::Read for DecompressionReader {
     }
 }
 
-/// Resolves a path to a program to a path by searching for the program in
-/// `PATH`.
+/// Resolves a path to a program.
 ///
-/// If the program could not be resolved, then an error is returned.
-///
-/// The purpose of doing this instead of passing the path to the program
-/// directly to Command::new is that Command::new will hand relative paths
-/// to CreateProcess on Windows, which will implicitly search the current
-/// working directory for the executable. This could be undesirable for
-/// security reasons. e.g., running ripgrep with the -z/--search-zip flag on an
-/// untrusted directory tree could result in arbitrary programs executing on
-/// Windows.
-///
-/// Note that this could still return a relative path if PATH contains a
-/// relative path. We permit this since it is assumed that the user has set
-/// this explicitly, and thus, desires this behavior.
-///
-/// # Platform behavior
-///
-/// On non-Windows, this is a no-op.
+/// Since Windows is not supported, this is a no-op that returns the program
+/// path unchanged.
 pub fn resolve_binary<P: AsRef<Path>>(
     prog: P,
 ) -> Result<PathBuf, CommandError> {
-    if !cfg!(windows) {
-        return Ok(prog.as_ref().to_path_buf());
-    }
-    try_resolve_binary(prog)
-}
-
-/// Resolves a path to a program to a path by searching for the program in
-/// `PATH`.
-///
-/// If the program could not be resolved, then an error is returned.
-///
-/// The purpose of doing this instead of passing the path to the program
-/// directly to Command::new is that Command::new will hand relative paths
-/// to CreateProcess on Windows, which will implicitly search the current
-/// working directory for the executable. This could be undesirable for
-/// security reasons. e.g., running ripgrep with the -z/--search-zip flag on an
-/// untrusted directory tree could result in arbitrary programs executing on
-/// Windows.
-///
-/// Note that this could still return a relative path if PATH contains a
-/// relative path. We permit this since it is assumed that the user has set
-/// this explicitly, and thus, desires this behavior.
-///
-/// If `check_exists` is false or the path is already an absolute path this
-/// will return immediately.
-fn try_resolve_binary<P: AsRef<Path>>(
-    prog: P,
-) -> Result<PathBuf, CommandError> {
-    use std::env;
-
-    fn is_exe(path: &Path) -> bool {
-        let Ok(md) = path.metadata() else { return false };
-        !md.is_dir()
-    }
-
-    let prog = prog.as_ref();
-    if prog.is_absolute() {
-        return Ok(prog.to_path_buf());
-    }
-    let Some(syspaths) = env::var_os("PATH") else {
-        let msg = "system PATH environment variable not found";
-        return Err(CommandError::io(io::Error::new(
-            io::ErrorKind::Other,
-            msg,
-        )));
-    };
-    for syspath in env::split_paths(&syspaths) {
-        if syspath.as_os_str().is_empty() {
-            continue;
-        }
-        let abs_prog = syspath.join(prog);
-        if is_exe(&abs_prog) {
-            return Ok(abs_prog.to_path_buf());
-        }
-        if abs_prog.extension().is_none() {
-            for extension in ["com", "exe"] {
-                let abs_prog = abs_prog.with_extension(extension);
-                if is_exe(&abs_prog) {
-                    return Ok(abs_prog.to_path_buf());
-                }
-            }
-        }
-    }
-    let msg = format!("{}: could not find executable in PATH", prog.display());
-    return Err(CommandError::io(io::Error::new(io::ErrorKind::Other, msg)));
+    Ok(prog.as_ref().to_path_buf())
 }
 
 fn default_decompression_commands() -> Vec<DecompressionCommand> {
