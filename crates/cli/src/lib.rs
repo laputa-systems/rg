@@ -5,7 +5,7 @@ library, there is no central type or function. However, a key focus of this
 crate is to improve failure modes and provide user friendly error messages
 when things go wrong.
 
-To the best extent possible, everything in this crate works on Windows, macOS
+To the best extent possible, everything in this crate works on macOS
 and Linux.
 
 
@@ -215,34 +215,9 @@ pub fn is_readable_stdin() -> bool {
         is_readable
     }
 
-    #[cfg(windows)]
+    #[cfg(not(unix))]
     fn imp() -> bool {
-        let stdin = winapi_util::HandleRef::stdin();
-        let typ = match winapi_util::file::typ(stdin) {
-            Ok(typ) => typ,
-            Err(err) => {
-                log::debug!(
-                    "for heuristic stdin detection on Windows, \
-                     could not get file type of stdin \
-                     (thus assuming stdin is not readable): {err}",
-                );
-                return false;
-            }
-        };
-        let is_disk = typ.is_disk();
-        let is_pipe = typ.is_pipe();
-        let is_readable = is_disk || is_pipe;
-        log::debug!(
-            "for heuristic stdin detection on Windows, \
-             found that is_disk={is_disk} and is_pipe={is_pipe}, \
-             and thus concluded that is_stdin_readable={is_readable}",
-        );
-        is_readable
-    }
-
-    #[cfg(not(any(unix, windows)))]
-    fn imp() -> bool {
-        log::debug!("on non-{{Unix,Windows}}, assuming stdin is not readable");
+        log::debug!("on non-Unix, assuming stdin is not readable");
         false
     }
 

@@ -152,8 +152,7 @@ rgtest!(r127, |dir: Dir, mut cmd: TestCommand| {
     // Where `.gitignore` contains `foo/sherlock`.
     //
     // ripgrep should ignore 'foo/sherlock' giving us results only from
-    // 'foo/watson' but on Windows ripgrep will include both 'foo/sherlock' and
-    // 'foo/watson' in the search results.
+    // 'foo/watson'.
     dir.create_dir(".git");
     dir.create(".gitignore", "foo/sherlock\n");
     dir.create_dir("foo");
@@ -189,10 +188,6 @@ rgtest!(r131, |dir: Dir, mut cmd: TestCommand| {
 
 // See: https://github.com/BurntSushi/ripgrep/issues/137
 //
-// TODO(burntsushi): Figure out how to make this test work on Windows. Right
-// now it gives "access denied" errors when trying to create a file symlink.
-// For now, disable test on Windows.
-#[cfg(not(windows))]
 rgtest!(r137, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", SHERLOCK);
     dir.link_file("sherlock", "sym1");
@@ -303,7 +298,6 @@ rgtest!(r251, |dir: Dir, mut cmd: TestCommand| {
 });
 
 // See: https://github.com/BurntSushi/ripgrep/issues/256
-#[cfg(not(windows))]
 rgtest!(r256, |dir: Dir, mut cmd: TestCommand| {
     dir.create_dir("bar");
     dir.create("bar/baz", "test");
@@ -313,7 +307,6 @@ rgtest!(r256, |dir: Dir, mut cmd: TestCommand| {
 });
 
 // See: https://github.com/BurntSushi/ripgrep/issues/256
-#[cfg(not(windows))]
 rgtest!(r256_j1, |dir: Dir, mut cmd: TestCommand| {
     dir.create_dir("bar");
     dir.create("bar/baz", "test");
@@ -370,7 +363,6 @@ rgtest!(r405, |dir: Dir, mut cmd: TestCommand| {
 });
 
 // See: https://github.com/BurntSushi/ripgrep/issues/428
-#[cfg(not(windows))]
 rgtest!(r428_color_context_path, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", "foo\nbar");
     cmd.args(&[
@@ -1684,13 +1676,7 @@ rgtest!(r3179_global_gitignore_cwd, |dir: Dir, mut cmd: TestCommand| {
     // I think. At least conceptually. So that will need to be
     // something we do when we rewrite `ignore`. Sigh.
     //
-    // ...  but, on Windows, path canonicalization seems to
-    // totally fuck things up, so skip it there. HEAVY sigh.
-    let dir_path = if cfg!(windows) {
-        dir.path().to_path_buf()
-    } else {
-        dir.path().canonicalize().unwrap()
-    };
+    let dir_path = dir.path().canonicalize().unwrap();
     let ignore_file_path = dir_path.join(".test.gitignore");
     cmd.current_dir("a/b/c")
         .arg("--files")
@@ -1720,10 +1706,6 @@ rgtest!(r3180_look_around_panic, |dir: Dir, mut cmd: TestCommand| {
 
 // See: https://github.com/BurntSushi/ripgrep/issues/3275
 //
-// This test doesn't seem to work on Windows for whatever reason. I haven't
-// investigated it yet, but I'm pretty sure it's just the test. I'm guessing
-// it's related to path separators. ---AG
-#[cfg(not(windows))]
 rgtest!(r3275_git_global_config_env, |dir: Dir, mut cmd: TestCommand| {
     dir.create_dir("foo");
     dir.create(".git", "");

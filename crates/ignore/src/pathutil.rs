@@ -4,34 +4,9 @@ use crate::walk::DirEntry;
 
 /// Returns true if and only if this path is considered to be hidden.
 ///
-/// # Platform behavior
-///
-/// ## Windows
-///
-/// This returns true if one of the following is true:
-///
-/// * The base name of the path starts with a `.`.
-/// * The file attributes have the `HIDDEN` property set.
-///
-/// ## All other platforms
-///
 /// This only returns true if the base name of the path starts with a `.`.
 pub(crate) fn is_hidden_path(dent: &Path) -> bool {
-    #[cfg(not(windows))]
     fn imp(path: &Path) -> bool {
-        is_hidden_path_only(path)
-    }
-
-    #[cfg(windows)]
-    fn imp(path: &Path) -> bool {
-        use std::os::windows::fs::MetadataExt;
-        use winapi_util::file;
-
-        if let Ok(md) = path.metadata() {
-            if file::is_hidden(md.file_attributes() as u64) {
-                return true;
-            }
-        }
         is_hidden_path_only(path)
     }
 
@@ -41,37 +16,9 @@ pub(crate) fn is_hidden_path(dent: &Path) -> bool {
 /// Returns true if and only if this directory entry is considered to be
 /// hidden.
 ///
-/// # Platform behavior
-///
-/// ## Windows
-///
-/// This returns true if one of the following is true:
-///
-/// * The base name of the path starts with a `.`.
-/// * The file attributes have the `HIDDEN` property set.
-///
-/// ## All other platforms
-///
 /// This only returns true if the base name of the path starts with a `.`.
 pub(crate) fn is_hidden_entry(dent: &DirEntry) -> bool {
-    #[cfg(not(windows))]
     fn imp(dent: &DirEntry) -> bool {
-        is_hidden_path_only(dent.path())
-    }
-
-    #[cfg(windows)]
-    fn imp(dent: &DirEntry) -> bool {
-        use std::os::windows::fs::MetadataExt;
-        use winapi_util::file;
-
-        // This looks like we're doing an extra stat call, but on Windows, the
-        // directory traverser reuses the metadata retrieved from each directory
-        // entry and stores it on the DirEntry itself. So this is "free."
-        if let Ok(md) = dent.metadata() {
-            if file::is_hidden(md.file_attributes() as u64) {
-                return true;
-            }
-        }
         is_hidden_path_only(dent.path())
     }
 

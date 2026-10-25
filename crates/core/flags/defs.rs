@@ -3058,9 +3058,6 @@ fn test_hyperlink_format() {
     assert_eq!(parseformat("none"), args.hyperlink_format);
 
     let args = parse_low_raw(["--hyperlink-format", "default"]).unwrap();
-    #[cfg(windows)]
-    assert_eq!(parseformat("file://{path}"), args.hyperlink_format);
-    #[cfg(not(windows))]
     assert_eq!(parseformat("file://{host}{path}"), args.hyperlink_format);
 
     let args = parse_low_raw(["--hyperlink-format", "file"]).unwrap();

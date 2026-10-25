@@ -231,9 +231,7 @@ pub(crate) struct SearchWorker<W> {
     config: Config,
     command_builder: grep::cli::CommandReaderBuilder,
     /// This is `None` when `search_zip` is not enabled, since in this case it
-    /// can never be used. We do this because building the reader can sometimes
-    /// do non-trivial work (like resolving the paths of decompression binaries
-    /// on Windows).
+    /// can never be used.
     decomp_builder: Option<grep::cli::DecompressionReaderBuilder>,
     matcher: PatternMatcher,
     searcher: grep::searcher::Searcher,

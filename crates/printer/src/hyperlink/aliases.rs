@@ -13,16 +13,7 @@ pub(super) const HYPERLINK_PATTERN_ALIASES: &[HyperlinkAlias] = &[
         0,
         "default",
         "RFC 8089 scheme (file://) (platform-aware)",
-        {
-            #[cfg(not(windows))]
-            {
-                "file://{host}{path}"
-            }
-            #[cfg(windows)]
-            {
-                "file://{path}"
-            }
-        },
+        "file://{host}{path}",
     ),
     alias(
         "file",

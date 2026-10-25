@@ -315,13 +315,11 @@ impl<'a> PrinterPath<'a> {
         sep: Option<u8>,
     ) -> PrinterPath<'a> {
         /// Replace the path separator in this path with the given separator
-        /// and do it in place. On Windows, both `/` and `\` are treated as
-        /// path separators that are both replaced by `new_sep`. In all other
-        /// environments, only `/` is treated as a path separator.
+        /// and do it in place. Only `/` is treated as a path separator.
         fn replace_separator(bytes: &[u8], sep: u8) -> Vec<u8> {
             let mut bytes = bytes.to_vec();
             for b in bytes.iter_mut() {
-                if *b == b'/' || (cfg!(windows) && *b == b'\\') {
+                if *b == b'/' {
                     *b = sep;
                 }
             }

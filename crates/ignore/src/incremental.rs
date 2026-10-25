@@ -702,7 +702,6 @@ mod tests {
     }
 
     // Test that a leading `./` impacts how the rules are matched.
-    #[cfg(not(windows))]
     #[test]
     fn leading_dot_slash_impacts_matching() {
         let td = tmpdir();

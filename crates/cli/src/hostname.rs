@@ -8,22 +8,14 @@ use std::{ffi::OsString, io};
 ///
 /// # Platform specific behavior
 ///
-/// On Windows, this currently uses the "physical DNS hostname" computer name.
-/// This may change in the future.
-///
 /// On Unix, this returns the result of the `gethostname` function from the
 /// `libc` linked into the program.
 pub fn hostname() -> io::Result<OsString> {
-    #[cfg(windows)]
-    {
-        use winapi_util::sysinfo::{ComputerNameKind, get_computer_name};
-        get_computer_name(ComputerNameKind::PhysicalDnsHostname)
-    }
     #[cfg(unix)]
     {
         gethostname()
     }
-    #[cfg(not(any(windows, unix)))]
+    #[cfg(not(unix))]
     {
         Err(io::Error::new(
             io::ErrorKind::Other,

@@ -179,7 +179,6 @@ dependencies = [
  "libc",
  "log",
  "termcolor",
- "winapi-util",
 ]
 
 [[package]]
@@ -252,7 +251,6 @@ dependencies = [
  "regex-automata",
  "same-file",
  "walkdir",
- "winapi-util",
 ]
 
 [[package]]

@@ -1,5 +1,7 @@
 ## FAQ
 
+**Note: Windows is not supported.**
+
 * [Does ripgrep support configuration files?](#config)
 * [What's changed in ripgrep recently?](#changelog)
 * [When is the next release?](#release)
@@ -11,18 +13,13 @@
 * [How do I search over multiple lines?](#multiline)
 * [How do I use lookaround and/or backreferences?](#fancy)
 * [How do I configure ripgrep's colors?](#colors)
-* [How do I enable true colors on Windows?](#truecolors-windows)
 * [How do I stop ripgrep from messing up colors when I kill it?](#stop-ripgrep)
-* [Why does using a leading `/` on Windows fail?](#because-cygwin)
 * [How do I get around the regex size limit?](#size-limit)
 * [How do I make the `-f/--file` flag faster?](#dfa-size)
 * [How do I make the output look like The Silver Searcher's output?](#silver-searcher-output)
 * [Why does ripgrep get slower when I enabled PCRE2 regexes?](#pcre2-slow)
 * [When I run `rg`, why does it execute some other command?](#rg-other-cmd)
-* [How do I create an alias for ripgrep on Windows?](#rg-alias-windows)
 * [How do I create a PowerShell profile?](#powershell-profile)
-* [Why do paths and encoding look wrong in Git Bash on Windows?](#windows-paths-encoding)
-* [How do I pipe non-ASCII content to ripgrep on Windows?](#pipe-non-ascii-windows)
 * [How can I search and replace with ripgrep?](#search-and-replace)
 * [How is ripgrep licensed?](#license)
 * [Can ripgrep replace grep?](#posix4ever)
@@ -303,37 +300,6 @@ Colors are an ideal candidate to set in your
 for an example specific to colors.
 
 
-<h3 name="truecolors-windows">
-How do I enable true colors on Windows?
-</h3>
-
-First, see the previous question's
-[answer on configuring colors](#colors).
-
-Secondly, coloring on Windows is a bit complicated. If you're using a terminal
-like Cygwin, then it's likely true color support already works out of the box.
-However, if you are using a normal Windows console (`cmd` or `PowerShell`) and
-a version of Windows prior to 10, then there is no known way to get true
-color support. If you are on Windows 10 and using a Windows console, then
-true colors should work out of the box with one caveat: you might need to
-clear ripgrep's default color settings first. That is, instead of this:
-
-```
-$ rg somepattern --colors 'match:fg:0x33,0x66,0xFF'
-```
-
-you should do this
-
-```
-$ rg somepattern --colors 'match:none' --colors 'match:fg:0x33,0x66,0xFF'
-```
-
-This is because ripgrep might set the default style for `match` to `bold`, and
-it seems like Windows 10's VT100 support doesn't permit bold and true color
-ANSI escapes to be used simultaneously. The work-around above will clear
-ripgrep's default styling, allowing you to craft it exactly as desired.
-
-
 <h3 name="stop-ripgrep">
 How do I stop ripgrep from messing up colors when I kill it?
 </h3>
@@ -358,26 +324,6 @@ was later deprecated in
 [#281](https://github.com/BurntSushi/ripgrep/issues/281). A full explanation is
 available
 [here](https://github.com/BurntSushi/ripgrep/issues/281#issuecomment-269093893).
-
-
-<h3 name="because-cygwin">
-Why does using a leading `/` on Windows fail?
-</h3>
-
-If you're using cygwin on Windows and try to search for a pattern beginning
-with a `/`, then it's possible that cygwin is mangling that pattern without
-your knowledge. For example, if you tried running `rg /foo` in a cygwin shell
-on Windows, then cygwin might mistakenly perform path translation on `/foo`,
-which would result in `rg C:/msys64/foo` being searched instead.
-
-You can fix this in one of three ways:
-
-1. Stop using cygwin.
-2. Escape the leading slash with an additional slash. e.g., `rg //foo`.
-3. Temporarily disable path translation by setting `MSYS_NO_PATHCONV=1`. e.g.,
-   `MSYS_NO_PATHCONV=1 rg /foo`.
-
-For more details, see https://github.com/BurntSushi/ripgrep/issues/1277
 
 
 <h3 name="size-limit">
@@ -780,42 +726,6 @@ Problems like this can be resolved in one of several ways:
   file: `alias ripgrep='command rg'`.
 
 
-<h3 name="rg-alias-windows">
-How do I create an alias for ripgrep on Windows?
-</h3>
-
-Often you can find a need to make alias for commands you use a lot that set
-certain flags. But PowerShell function aliases do not behave like your typical
-linux shell alias. You always need to propagate arguments and `stdin` input.
-But it cannot be done simply as
-`function grep() { $input | rg.exe --hidden $args }`
-
-Use below example as reference to how setup alias in PowerShell.
-
-```powershell
-function grep {
-    $count = @($input).Count
-    $input.Reset()
-
-    if ($count) {
-        $input | rg.exe --hidden $args
-    }
-    else {
-        rg.exe --hidden $args
-    }
-}
-```
-
-PowerShell special variables:
-
-* input - is powershell `stdin` object that allows you to access its content.
-* args - is array of arguments passed to this function.
-
-This alias checks whether there is `stdin` input and propagates only if there
-is some lines. Otherwise empty `$input` will make powershell to trigger `rg` to
-search empty `stdin`.
-
-
 <h3 name="powershell-profile">
 How do I create a PowerShell profile?
 </h3>
@@ -829,60 +739,6 @@ for more details.
 Any PowerShell code in this file gets evaluated at the start of console. This
 way you can have own aliases to be created at start.
 
-
-<h3 name="windows-paths-encoding">
-Why do paths and encoding look wrong in Git Bash on Windows?
-</h3>
-
-ripgrep prints file paths using the platform's native path separator (`\` on
-Windows). Under Git Bash, MSYS2, or Cygwin, that can look awkward next to
-Unix-style tools, and console locale settings can also garble non-ASCII
-output even though ripgrep is emitting the file bytes unchanged.
-
-If you want forward slashes in printed paths when using those shells, set
-`--path-separator`. A common alias is:
-
-```
-alias rg='rg --path-separator //'
-```
-
-The double slash avoids Git Bash rewriting a single `/`.
-
-If non-ASCII characters (for example umlauts in file contents) look wrong in
-a Windows console, try enabling the system UTF-8 locale. Note that this is
-a system-wide change and may affect other programs.
-
-See also
-[Why does using a leading `/` on Windows fail?](#because-cygwin) and
-[How do I pipe non-ASCII content to ripgrep on Windows?](#pipe-non-ascii-windows)
-
-
-<h3 name="pipe-non-ascii-windows">
-How do I pipe non-ASCII content to ripgrep on Windows?
-</h3>
-
-When piping input into native executables in PowerShell, the encoding of the
-input is controlled by the `$OutputEncoding` variable. By default, this is set
-to US-ASCII, and any characters in the pipeline that don't have encodings in
-US-ASCII are converted to `?` (question mark) characters.
-
-To change this setting, set `$OutputEncoding` to a different encoding, as
-represented by a .NET encoding object. Some common examples are below. The
-value of this variable is reset when PowerShell restarts, so to make this
-change take effect every time PowerShell is started add a line setting the
-variable into your PowerShell profile.
-
-Example `$OutputEncoding` settings:
-
-* UTF-8 without BOM: `$OutputEncoding = [System.Text.UTF8Encoding]::new()`
-* The console's output encoding:
-  `$OutputEncoding = [System.Console]::OutputEncoding`
-
-If you continue to have encoding problems, you can also force the encoding
-that the console will use for printing to UTF-8 with
-`[System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8`. This
-will also reset when PowerShell is restarted, so you can add that line
-to your profile as well if you want to make the setting permanent.
 
 <h3 name="search-and-replace">
 How can I search and replace with ripgrep?

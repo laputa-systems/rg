@@ -1036,13 +1036,8 @@ pub(crate) fn create_gitignore<T: AsRef<OsStr>>(
         // directories without ignore files likely greatly exceeds the number
         // with ignore files, this check generally makes sense.
         //
-        // However, until demonstrated otherwise, we speculatively do not do
-        // this on Windows since Windows is notorious for having slow file
-        // system operations. Namely, it's not clear whether this analysis
-        // makes sense on Windows.
-        //
         // For more details: https://github.com/BurntSushi/ripgrep/pull/1381
-        if cfg!(windows) || gipath.exists() {
+        if gipath.exists() {
             errs.maybe_push_ignore_io(builder.add(gipath));
         }
     }
