@@ -52,7 +52,7 @@ jobs:
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
           CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS: -C target-feature=+crt-static
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_RUSTFLAGS: -C target-feature=+crt-static
-        run: cargo build --locked --release --bin rg --target "${{ matrix.target }}"
+        run: cargo build --locked --release --features pcre2 --bin rg --target "${{ matrix.target }}"
 
       - name: Package binary
         run: cp "target/${{ matrix.target }}/release/rg" "rg-${{ matrix.target }}"

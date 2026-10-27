@@ -136,8 +136,8 @@ generally speaking):
   not supported in ripgrep's default regex engine. PCRE2 support can be
   enabled with `-P/--pcre2` (use PCRE2 always) or `--auto-hybrid-regex` (use
   PCRE2 only if needed). An alternative syntax is provided via the `--engine
-  (default|pcre2|auto)` option. The prerelease binaries from this repository
-  are built without that feature.
+  (default|pcre2|auto)` option. The release workflow builds with the `pcre2`
+  feature. Zips published before the next run of that workflow do not.
 * ripgrep has [rudimentary support for replacements](GUIDE.md#replacements),
   which permit rewriting output based on what was matched.
 * ripgrep supports [searching files in text encodings](GUIDE.md#file-encoding)
@@ -241,7 +241,8 @@ one `rg` binary and no man page or shell completions:
 * `rg-x86_64-unknown-linux-musl.zip` (static)
 * `rg-aarch64-unknown-linux-musl.zip` (static)
 
-Those binaries are built without the `pcre2` feature. `rg -P` prints
+Zips published before the next release workflow run were built without the
+`pcre2` feature. On those binaries, `rg -P` prints
 `PCRE2 is not available in this build of ripgrep` and exits with status 2.
 Windows is not supported.
 
@@ -267,7 +268,7 @@ when `git` works at build time. The format is in
 `profile.release` in `Cargo.toml` uses fat LTO, strips the binary, and sets
 `panic = "abort"`.
 
-The release workflow does not pass `--features pcre2`. To build PCRE2 locally:
+The release workflow passes `--features pcre2`. To build that locally:
 
 ```
 cargo build --release --features pcre2

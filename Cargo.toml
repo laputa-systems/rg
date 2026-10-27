@@ -35,6 +35,10 @@ name = "rg"
 name = "integration"
 path = "tests/tests.rs"
 
+[[test]]
+name = "release_workflow"
+path = "tests/release_workflow.rs"
+
 [workspace]
 members = [
   "crates/globset",

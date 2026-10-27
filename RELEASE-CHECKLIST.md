@@ -8,8 +8,8 @@ publish to crates.io.
 2. Dispatch the `release` workflow on that commit.
 3. The workflow builds `rg` for `aarch64-apple-darwin`,
    `x86_64-unknown-linux-musl`, and `aarch64-unknown-linux-musl`.
-   The command is `cargo build --locked --release --bin rg`. It does not
-   pass `--features pcre2`. `rust-toolchain.toml` selects the compiler.
+   The command is `cargo build --locked --release --features pcre2 --bin rg`.
+   `rust-toolchain.toml` selects the compiler.
 4. The workflow rejects a Linux ELF that has an interpreter or a `NEEDED`
    entry. It then uploads three zip archives and creates the prerelease tag
    `release-<sha>`.

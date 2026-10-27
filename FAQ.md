@@ -227,9 +227,9 @@ $ rg -P '(\w{10})\1'
 PCRE2 is not available in this build of ripgrep
 ```
 
-The prerelease binaries from this repository are built without the `pcre2`
-feature, so the command above fails. Build from source with `--features pcre2`
-to enable `-P`. Distro packages and `cargo install ripgrep` are upstream
+The release workflow passes `--features pcre2`. Zips published before the
+next run of that workflow were built without it, so `-P` fails on those
+binaries. Distro packages and `cargo install ripgrep` are upstream
 ripgrep, not this fork.
 
 
