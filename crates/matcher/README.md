@@ -4,7 +4,6 @@ This crate provides a low level interface for describing regular expression
 matchers. The `grep` crate uses this interface in order to make the regex
 engine it uses pluggable.
 
-[![Build status](https://github.com/BurntSushi/ripgrep/workflows/ci/badge.svg)](https://github.com/BurntSushi/ripgrep/actions)
 [![](https://img.shields.io/crates/v/grep-matcher.svg)](https://crates.io/crates/grep-matcher)
 
 Dual-licensed under MIT or the [UNLICENSE](https://unlicense.org/).

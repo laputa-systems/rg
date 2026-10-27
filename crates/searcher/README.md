@@ -5,7 +5,6 @@ things like reporting contextual lines, counting lines, inverting a search,
 detecting binary data, automatic UTF-16 transcoding and deciding whether or not
 to use memory maps.
 
-[![Build status](https://github.com/BurntSushi/ripgrep/workflows/ci/badge.svg)](https://github.com/BurntSushi/ripgrep/actions)
 [![](https://img.shields.io/crates/v/grep-searcher.svg)](https://crates.io/crates/grep-searcher)
 
 Dual-licensed under MIT or the [UNLICENSE](https://unlicense.org/).

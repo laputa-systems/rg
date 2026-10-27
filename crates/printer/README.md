@@ -3,7 +3,6 @@ grep-printer
 Print results from line oriented searching in a human readable, aggregate or
 JSON Lines format.
 
-[![Build status](https://github.com/BurntSushi/ripgrep/workflows/ci/badge.svg)](https://github.com/BurntSushi/ripgrep/actions)
 [![](https://img.shields.io/crates/v/grep-printer.svg)](https://crates.io/crates/grep-printer)
 
 Dual-licensed under MIT or the [UNLICENSE](https://unlicense.org/).

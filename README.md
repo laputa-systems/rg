@@ -4,13 +4,10 @@ ripgrep is a line-oriented search tool that recursively searches the current
 directory for a regex pattern. By default, ripgrep will respect gitignore rules
 and automatically skip hidden files/directories and binary files. (To disable
 all automatic filtering by default, use `rg -uuu`.) ripgrep has first class
-support on macOS and Linux, with binary downloads available for [every
-release](https://github.com/BurntSushi/ripgrep/releases). ripgrep is similar to
-other popular search tools like The Silver Searcher, ack and grep.
-
-[![Build status](https://github.com/BurntSushi/ripgrep/workflows/ci/badge.svg)](https://github.com/BurntSushi/ripgrep/actions)
-[![Crates.io](https://img.shields.io/crates/v/ripgrep.svg)](https://crates.io/crates/ripgrep)
-[![Packaging status](https://repology.org/badge/tiny-repos/ripgrep.svg)](https://repology.org/project/ripgrep/badges)
+support on macOS and Linux. Prebuilt binaries for this fork are the
+[prereleases](https://github.com/laputa-systems/rg/releases) under
+[Installation](#installation). ripgrep is similar to other popular search
+tools like The Silver Searcher, ack and grep.
 
 Dual-licensed under MIT or the [UNLICENSE](https://unlicense.org).
 
@@ -133,12 +130,14 @@ generally speaking):
   of search results, searching multiple patterns, highlighting matches with
   color and full Unicode support. Unlike GNU grep, ripgrep stays fast while
   supporting Unicode (which is always on).
-* ripgrep has optional support for switching its regex engine to use PCRE2.
-  Among other things, this makes it possible to use look-around and
-  backreferences in your patterns, which are not supported in ripgrep's default
-  regex engine. PCRE2 support can be enabled with `-P/--pcre2` (use PCRE2
-  always) or `--auto-hybrid-regex` (use PCRE2 only if needed). An alternative
-  syntax is provided via the `--engine (default|pcre2|auto)` option.
+* ripgrep has optional support for switching its regex engine to use PCRE2
+  when you build with the `pcre2` feature. Among other things, this makes it
+  possible to use look-around and backreferences in your patterns, which are
+  not supported in ripgrep's default regex engine. PCRE2 support can be
+  enabled with `-P/--pcre2` (use PCRE2 always) or `--auto-hybrid-regex` (use
+  PCRE2 only if needed). An alternative syntax is provided via the `--engine
+  (default|pcre2|auto)` option. The prerelease binaries from this repository
+  are built without that feature.
 * ripgrep has [rudimentary support for replacements](GUIDE.md#replacements),
   which permit rewriting output based on what was matched.
 * ripgrep supports [searching files in text encodings](GUIDE.md#file-encoding)
@@ -232,260 +231,57 @@ repo](https://github.com/nalgeon/tryxinyminutes).
 
 ### Installation
 
-The binary name for ripgrep is `rg`.
+The binary name is `rg`.
 
-**[Archives of precompiled binaries for ripgrep are available for macOS
-and Linux.](https://github.com/BurntSushi/ripgrep/releases)** Linux
-binaries are static executables. Users of platforms not explicitly
-mentioned below are advised to download one of these archives.
+This repository publishes [prereleases](https://github.com/laputa-systems/rg/releases).
+Each tag is `release-<sha>` and has three zip archives. Each archive contains
+one `rg` binary and no man page or shell completions:
 
+* `rg-aarch64-apple-darwin.zip`
+* `rg-x86_64-unknown-linux-musl.zip` (static)
+* `rg-aarch64-unknown-linux-musl.zip` (static)
+
+Those binaries are built without the `pcre2` feature. `rg -P` prints
+`PCRE2 is not available in this build of ripgrep` and exits with status 2.
 Windows is not supported.
 
-If you're a **macOS Homebrew** or a **Linuxbrew** user, then you can install
-ripgrep from homebrew-core:
-
-```
-$ brew install ripgrep
-```
-
-If you're a **MacPorts** user, then you can install ripgrep from the
-[official ports](https://www.macports.org/ports.php?by=name&substr=ripgrep):
-
-```
-$ sudo port install ripgrep
-```
-
-Windows is not supported. There are no Chocolatey, Scoop or Winget
-installation methods.
-
-If you're an **Arch Linux** user, then you can install ripgrep from the official repos:
-
-```
-$ sudo pacman -S ripgrep
-```
-
-If you're a **Gentoo** user, you can install ripgrep from the
-[official repo](https://packages.gentoo.org/packages/sys-apps/ripgrep):
-
-```
-$ sudo emerge sys-apps/ripgrep
-```
-
-If you're a **Fedora** user, you can install ripgrep from official
-repositories.
-
-```
-$ sudo dnf install ripgrep
-```
-
-If you're an **openSUSE** user, ripgrep is included in **openSUSE Tumbleweed**
-and **openSUSE Leap** since 15.1.
-
-```
-$ sudo zypper install ripgrep
-```
-
-If you're a **CentOS Stream 10** user, you can install ripgrep from the
-[EPEL](https://docs.fedoraproject.org/en-US/epel/getting-started/) repository:
-
-```
-$ sudo dnf config-manager --set-enabled crb
-$ sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
-$ sudo dnf install ripgrep
-```
-
-If you're a **Red Hat 10** user, you can install ripgrep from the
-[EPEL](https://docs.fedoraproject.org/en-US/epel/getting-started/) repository:
-
-```
-$ sudo subscription-manager repos --enable codeready-builder-for-rhel-10-$(arch)-rpms
-$ sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
-$ sudo dnf install ripgrep
-```
-
-If you're a **Rocky Linux 10** user, you can install ripgrep from the
-[EPEL](https://docs.fedoraproject.org/en-US/epel/getting-started/) repository:
-
-```
-$ sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
-$ sudo dnf install ripgrep
-```
-
-If you're a **Nix** user, you can install ripgrep from
-[nixpkgs](https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/ri/ripgrep/package.nix):
-
-```
-$ nix-env --install ripgrep
-```
-
-If you're a **Flox** user, you can install ripgrep as follows:
-
-```
-$ flox install ripgrep
-```
-
-If you're a **Guix** user, you can install ripgrep from the official
-package collection:
-
-```
-$ guix install ripgrep
-```
-
-If you're a **Debian** user (or a user of a Debian derivative like **Ubuntu**),
-then ripgrep can be installed using a binary `.deb` file provided in each
-[ripgrep release](https://github.com/BurntSushi/ripgrep/releases).
-
-```
-$ curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.1/ripgrep_14.1.1-1_amd64.deb
-$ sudo dpkg -i ripgrep_14.1.1-1_amd64.deb
-```
-
-If you run Debian stable, ripgrep is [officially maintained by
-Debian](https://tracker.debian.org/pkg/rust-ripgrep), although its version may
-be older than the `deb` package available in the previous step.
-
-```
-$ sudo apt-get install ripgrep
-```
-
-If you're an **Ubuntu Cosmic (18.10)** (or newer) user, ripgrep is
-[available](https://launchpad.net/ubuntu/+source/rust-ripgrep) using the same
-packaging as Debian:
-
-```
-$ sudo apt-get install ripgrep
-```
-
-(N.B. Various snaps for ripgrep on Ubuntu are also available, but none of them
-seem to work right and generate a number of very strange bug reports that I
-don't know how to fix and don't have the time to fix. Therefore, it is no
-longer a recommended installation option.)
-
-If you're an **ALT** user, you can install ripgrep from the
-[official repo](https://packages.altlinux.org/en/search?name=ripgrep):
-
-```
-$ sudo apt-get install ripgrep
-```
-
-If you're a **FreeBSD** user, then you can install ripgrep from the
-[official ports](https://www.freshports.org/textproc/ripgrep/):
-
-```
-$ sudo pkg install ripgrep
-```
-
-If you're an **OpenBSD** user, then you can install ripgrep from the
-[official ports](https://openports.se/textproc/ripgrep):
-
-```
-$ doas pkg_add ripgrep
-```
-
-If you're a **NetBSD** user, then you can install ripgrep from
-[pkgsrc](https://pkgsrc.se/textproc/ripgrep):
-
-```
-$ sudo pkgin install ripgrep
-```
-
-If you're a **Haiku x86_64** user, then you can install ripgrep from the
-[official ports](https://github.com/haikuports/haikuports/tree/master/sys-apps/ripgrep):
-
-```
-$ sudo pkgman install ripgrep
-```
-
-If you're a **Haiku x86_gcc2** user, then you can install ripgrep from the
-same port as Haiku x86_64 using the x86 secondary architecture build:
-
-```
-$ sudo pkgman install ripgrep_x86
-```
-
-If you're a **Void Linux** user, then you can install ripgrep from the
-[official repository](https://voidlinux.org/packages/?arch=x86_64&q=ripgrep):
-
-```
-$ sudo xbps-install -Syv ripgrep
-```
-
-If you're a **Rust programmer**, ripgrep can be installed with `cargo`.
-
-* Note that the minimum supported version of Rust for ripgrep is **1.96.0**,
-  although ripgrep may work with older versions.
-* Note that the binary may be bigger than expected because it contains debug
-  symbols. This is intentional. To remove debug symbols and therefore reduce
-  the file size, run `strip` on the binary.
-
-```
-$ cargo install ripgrep
-```
-
-Alternatively, one can use [`cargo
-binstall`](https://github.com/cargo-bins/cargo-binstall) to install a ripgrep
-binary directly from GitHub:
-
-```
-$ cargo binstall ripgrep
-```
-
+`brew`, distro packages, and `cargo install ripgrep` install upstream
+ripgrep, not this fork.
 
 ### Building
 
-ripgrep is written in Rust, so you'll need to grab a
-[Rust installation](https://www.rust-lang.org/) in order to compile it.
-ripgrep compiles with Rust 1.96.0 (stable) or newer. In general, ripgrep tracks
-the latest stable release of the Rust compiler.
-
-To build ripgrep:
+`rust-toolchain.toml` pins the compiler (`nightly-2026-09-15`). The minimum
+supported Rust version is 1.96 (`rust-version` in `Cargo.toml`).
 
 ```
-$ git clone https://github.com/BurntSushi/ripgrep
-$ cd ripgrep
-$ cargo build --release
-$ ./target/release/rg --version
-0.1.3
+git clone https://github.com/laputa-systems/rg
+cd rg
+cargo build --release
+./target/release/rg --version
 ```
 
-**NOTE:** In the past, ripgrep supported a `simd-accel` Cargo feature when
-using a Rust nightly compiler. This only benefited UTF-16 transcoding.
-Since it required unstable features, this build mode was prone to breakage.
-Because of that, support for it has been removed. If you want SIMD
-optimizations for UTF-16 transcoding, then you'll have to petition the
-[`encoding_rs`](https://github.com/hsivonen/encoding_rs) project to use stable
-APIs.
+`rg --version` prints `ripgrep`, the crate version, and a short git revision
+when `git` works at build time. The format is in
+`crates/core/flags/doc/version.rs`.
 
-Finally, optional PCRE2 support can be built with ripgrep by enabling the
-`pcre2` feature:
+`profile.release` in `Cargo.toml` uses fat LTO, strips the binary, and sets
+`panic = "abort"`.
+
+The release workflow does not pass `--features pcre2`. To build PCRE2 locally:
 
 ```
-$ cargo build --release --features 'pcre2'
+cargo build --release --features pcre2
 ```
 
-Enabling the PCRE2 feature works with a stable Rust compiler and will
-attempt to automatically find and link with your system's PCRE2 library via
-`pkg-config`. If one doesn't exist, then ripgrep will build PCRE2 from source
-using your system's C compiler and then statically link it into the final
-executable. Static linking can be forced even when there is an available PCRE2
-system library by either building ripgrep with the MUSL target or by setting
-`PCRE2_SYS_STATIC=1`.
-
-ripgrep can be built with the MUSL target on Linux by first installing the MUSL
-library on your system (consult your friendly neighborhood package manager).
-Then you just need to add MUSL support to your Rust toolchain and rebuild
-ripgrep, which yields a fully static executable:
+That feature uses `pkg-config` to find PCRE2. If that fails, the build
+compiles PCRE2 and links it statically. Set `PCRE2_SYS_STATIC=1` to force
+static linking, or build a `*-unknown-linux-musl` target. A musl build that
+also enables PCRE2 needs `musl-gcc`.
 
 ```
-$ rustup target add x86_64-unknown-linux-musl
-$ cargo build --release --target x86_64-unknown-linux-musl
+rustup target add x86_64-unknown-linux-musl
+cargo build --release --target x86_64-unknown-linux-musl
 ```
-
-Applying the `--features` flag from above works as expected. If you want to
-build a static executable with MUSL and with PCRE2, then you will need to have
-`musl-gcc` installed, which might be in a separate package from the actual
-MUSL library, depending on your Linux distribution.
-
 
 ### Running tests
 
@@ -509,10 +305,9 @@ grep](https://dandavison.github.io/delta/grep.html) for more details.
 
 ### Vulnerability reporting
 
-For reporting a security vulnerability, please
-[contact Andrew Gallant](https://blog.burntsushi.net/about/).
-The contact page has my email address and PGP public key if you wish to send an
-encrypted message.
+[Andrew Gallant](https://blog.burntsushi.net/about/) maintains upstream
+ripgrep, not this fork's binaries. This repository does not publish its own
+security contact.
 
 
 ### Translations

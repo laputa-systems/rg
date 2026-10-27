@@ -4,11 +4,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please review the following common issues before filing a bug. You may also be interested in reading the [FAQ](https://github.com/BurntSushi/ripgrep/blob/master/FAQ.md)
-        and the [user guide](https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md).
+        Please review the following common issues before filing a bug. You may also be interested in reading the [FAQ](https://github.com/laputa-systems/rg/blob/master/FAQ.md)
+        and the [user guide](https://github.com/laputa-systems/rg/blob/master/GUIDE.md).
 
         * Unable to search for text with leading dash/hyphen: This is not a bug. Use `rg -- -mytext` or `rg -e -mytext`. See #102, #215, #624.
-        * Unable to build with old version of Rust. This is not a bug. ripgrep tracks the latest stable release of Rust. See #1019, #1433, #2534.
+        * Unable to build with an older compiler than `rust-toolchain.toml`. This repository pins that toolchain. The MSRV in `Cargo.toml` is 1.96.
         * ripgrep package is broken or out of date. ripgrep's author does not maintain packages for Red Hat, Ubuntu, Arch, Homebrew, WinGet, etc. If you have an issue with one of these, please contact your package maintainer. See #1637, #2264, #2459.
 
   - type: checkboxes

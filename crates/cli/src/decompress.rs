@@ -86,10 +86,7 @@ impl DecompressionMatcherBuilder {
     /// The syntax for the glob is documented in the
     /// [`globset` crate](https://docs.rs/globset/#syntax).
     ///
-    /// The `program` given is used as-is when executing the decompression
-    /// command. If the program could not be resolved, then it is silently
-    /// ignored and the association is dropped. For this reason, callers
-    /// should prefer `try_associate`.
+    /// The `program` is stored as given. It is not resolved against `PATH`.
     pub fn associate<P, I, A>(
         &mut self,
         glob: &str,
@@ -113,9 +110,7 @@ impl DecompressionMatcherBuilder {
     /// The syntax for the glob is documented in the
     /// [`globset` crate](https://docs.rs/globset/#syntax).
     ///
-    /// The `program` given is used as-is when executing the decompression
-    /// command. If the program could not be resolved, then an error is
-    /// returned.
+    /// The `program` is stored as given. It is not resolved against `PATH`.
     pub fn try_associate<P, I, A>(
         &mut self,
         glob: &str,
@@ -391,10 +386,7 @@ impl io::Read for DecompressionReader {
     }
 }
 
-/// Resolves a path to a program.
-///
-/// Since Windows is not supported, this is a no-op that returns the program
-/// path unchanged.
+/// Returns `prog` unchanged. This function does not search `PATH`.
 pub fn resolve_binary<P: AsRef<Path>>(
     prog: P,
 ) -> Result<PathBuf, CommandError> {

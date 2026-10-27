@@ -3,4 +3,4 @@ contact_links:
   - name: Ask a question
     about: |
       You've come to seek help or want to discuss something related to ripgrep.
-    url: https://github.com/BurntSushi/ripgrep/discussions/new
+    url: https://github.com/laputa-systems/rg/issues

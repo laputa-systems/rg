@@ -4,7 +4,6 @@ The `grep-pcre2` crate provides an implementation of the `Matcher` trait from
 the `grep-matcher` crate. This implementation permits PCRE2 to be used in the
 `grep` crate for fast line oriented searching.
 
-[![Build status](https://github.com/BurntSushi/ripgrep/workflows/ci/badge.svg)](https://github.com/BurntSushi/ripgrep/actions)
 [![](https://img.shields.io/crates/v/grep-pcre2.svg)](https://crates.io/crates/grep-pcre2)
 
 Dual-licensed under MIT or the [UNLICENSE](https://unlicense.org/).

@@ -1368,10 +1368,6 @@ fn hostname(bin: Option<&Path>) -> Option<String> {
     Some(hostname.to_string())
 }
 
-/// Attempts to get the hostname by using platform specific routines.
-///
-/// For example, this will do `gethostname` on Unix and `GetComputerNameExW` on
-/// Windows.
 fn platform_hostname() -> Option<String> {
     let hostname_os = match grep::cli::hostname() {
         Ok(x) => x,

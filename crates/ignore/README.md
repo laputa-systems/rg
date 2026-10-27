@@ -4,7 +4,6 @@ The ignore crate provides a fast recursive directory iterator that respects
 various filters such as globs, file types and `.gitignore` files. This crate
 also provides lower level direct access to gitignore and file type matchers.
 
-[![Build status](https://github.com/BurntSushi/ripgrep/workflows/ci/badge.svg)](https://github.com/BurntSushi/ripgrep/actions)
 [![](https://img.shields.io/crates/v/ignore.svg)](https://crates.io/crates/ignore)
 
 Dual-licensed under MIT or the [UNLICENSE](https://unlicense.org/).

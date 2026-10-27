@@ -82,18 +82,17 @@ Note that the man page's documentation for options is equivalent to the output
 shown in `rg --help`. To see more condensed documentation (one line per flag),
 run `rg -h`.
 
-The man page is also included in all
-[ripgrep binary releases](https://github.com/BurntSushi/ripgrep/releases).
+This repository's zip archives do not include the man page. Generate it with
+the command above.
 
 
 <h3 name="complete">
 Does ripgrep have support for shell auto-completion?
 </h3>
 
-Yes! If you installed ripgrep through a package manager on a Unix system, then
-the shell completion files included in the release archive should have been
-installed for you automatically. If not, you can generate completions using
-ripgrep's command line interface.
+Yes. This repository's zip archives do not include completion files. Generate
+them with the commands below. A distro package of upstream ripgrep may install
+completions for you. That package is not this fork.
 
 For **bash**:
 
@@ -228,11 +227,10 @@ $ rg -P '(\w{10})\1'
 PCRE2 is not available in this build of ripgrep
 ```
 
-Most of the releases distributed by the ripgrep project here on GitHub will
-come bundled with PCRE2 enabled. If you installed ripgrep through a different
-means (like your system's package manager), then please reach out to the
-maintainer of that package to see whether it's possible to enable the PCRE2
-feature.
+The prerelease binaries from this repository are built without the `pcre2`
+feature, so the command above fails. Build from source with `--features pcre2`
+to enable `-P`. Distro packages and `cargo install ripgrep` are upstream
+ripgrep, not this fork.
 
 
 <h3 name="colors">

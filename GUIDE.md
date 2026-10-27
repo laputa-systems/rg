@@ -34,9 +34,9 @@ line does not match the pattern, then the line is not printed.
 
 The best way to see how this works is with an example. To show an example, we
 need something to search. Let's try searching ripgrep's source code. First
-grab a ripgrep source archive from
+grab upstream ripgrep 0.7.1 (not this checkout) from
 https://github.com/BurntSushi/ripgrep/archive/0.7.1.zip
-and extract it:
+and extract it. The file list below is that archive:
 
 ```
 $ curl -LO https://github.com/BurntSushi/ripgrep/archive/0.7.1.zip
