@@ -1,6 +1,6 @@
 use ignore::gitignore::GitignoreBuilder;
 
-const IGNORE_FILE: &'static str = "tests/gitignore_skip_bom.gitignore";
+const IGNORE_FILE: &str = "tests/gitignore_skip_bom.gitignore";
 
 /// Skip a Byte-Order Mark (BOM) at the beginning of the file, matching Git's
 /// behavior.

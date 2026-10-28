@@ -6,7 +6,7 @@ use std::{collections::BTreeMap, fmt::Write};
 
 use crate::flags::{Flag, defs::FLAGS, doc::version};
 
-const TEMPLATE: &'static str = include_str!("template.rg.1");
+const TEMPLATE: &str = include_str!("template.rg.1");
 
 /// Wraps `std::write!` and asserts there is no failure.
 ///
@@ -27,14 +27,14 @@ macro_rules! writeln {
 pub(crate) fn generate() -> String {
     let mut cats = BTreeMap::new();
     for flag in FLAGS.iter().copied() {
-        let mut cat = cats.entry(flag.doc_category()).or_insert(String::new());
+        let cat = cats.entry(flag.doc_category()).or_insert(String::new());
         if !cat.is_empty() {
             writeln!(cat, ".sp");
         }
-        generate_flag(flag, &mut cat);
+        generate_flag(flag, cat);
     }
 
-    let mut out = TEMPLATE.replace("!!VERSION!!", &version::generate_digits());
+    let mut out = TEMPLATE.replace("!!VERSION!!", version::generate_digits().as_str());
     for (cat, value) in cats.iter() {
         let var = format!("!!{name}!!", name = cat.as_str());
         out = out.replace(&var, value);

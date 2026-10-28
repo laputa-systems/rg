@@ -11,7 +11,7 @@ use std::time::Duration;
 
 use bstr::ByteSlice;
 
-static TEST_DIR: &'static str = "ripgrep-tests";
+static TEST_DIR: &str = "ripgrep-tests";
 static NEXT_ID: AtomicUsize = AtomicUsize::new(0);
 
 /// Setup an empty work directory and return a command pointing to the ripgrep
@@ -78,7 +78,7 @@ impl Dir {
             .expect("executable's directory")
             .to_path_buf();
         let dir =
-            env::temp_dir().join(TEST_DIR).join(name).join(&format!("{id}"));
+            env::temp_dir().join(TEST_DIR).join(name).join(format!("{id}"));
         if dir.exists() {
             nice_err(&dir, fs::remove_dir_all(&dir));
         }
@@ -481,7 +481,7 @@ fn cross_runner() -> Option<String> {
 /// This is useful because it has been difficult to get some tests to pass
 /// under Cross.
 pub fn is_cross() -> bool {
-    std::env::var("CROSS_RUNNER").ok().map_or(false, |v| !v.is_empty())
+    std::env::var("CROSS_RUNNER").ok().is_some_and(|v| !v.is_empty())
 }
 
 /// Strips absolutely fucked `<jemalloc>:` lines from the output.

@@ -96,7 +96,6 @@ impl Matcher for RegexMatcher {
             // line.
             let i = haystack
                 .find_byte(self.line_term.unwrap().as_byte())
-                .map(|i| i)
                 .unwrap_or(haystack.len() - 1);
             Ok(Some(LineMatchKind::Candidate(i)))
         } else {
@@ -180,7 +179,7 @@ impl Sink for KitchenSink {
         _searcher: &Searcher,
         sink_finish: &SinkFinish,
     ) -> Result<(), io::Error> {
-        writeln!(self.0, "")?;
+        writeln!(self.0)?;
         writeln!(self.0, "byte count:{}", sink_finish.byte_count())?;
         if let Some(offset) = sink_finish.binary_byte_offset() {
             writeln!(self.0, "binary offset:{}", offset)?;

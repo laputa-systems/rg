@@ -85,7 +85,7 @@ pub(super) const FLAGS: &[&dyn Flag] = &[
     &IgnoreFileCaseInsensitive,
     &IncludeZero,
     &InvertMatch,
-    &JSON,
+    &Json,
     &LineBuffered,
     &LineNumber,
     &LineNumberNo,
@@ -618,19 +618,19 @@ transformations on the data, such as decompression or a \flag{pre} filter.
 #[test]
 fn test_byte_offset() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.byte_offset);
+    assert!(!args.byte_offset);
 
     let args = parse_low_raw(["--byte-offset"]).unwrap();
-    assert_eq!(true, args.byte_offset);
+    assert!(args.byte_offset);
 
     let args = parse_low_raw(["-b"]).unwrap();
-    assert_eq!(true, args.byte_offset);
+    assert!(args.byte_offset);
 
     let args = parse_low_raw(["--byte-offset", "--no-byte-offset"]).unwrap();
-    assert_eq!(false, args.byte_offset);
+    assert!(!args.byte_offset);
 
     let args = parse_low_raw(["--no-byte-offset", "-b"]).unwrap();
-    assert_eq!(true, args.byte_offset);
+    assert!(args.byte_offset);
 }
 
 /// -s/--case-sensitive
@@ -1428,27 +1428,27 @@ This flag overrides \flag{null-data}.
 #[test]
 fn test_crlf() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.crlf);
+    assert!(!args.crlf);
 
     let args = parse_low_raw(["--crlf"]).unwrap();
-    assert_eq!(true, args.crlf);
-    assert_eq!(false, args.null_data);
+    assert!(args.crlf);
+    assert!(!args.null_data);
 
     let args = parse_low_raw(["--crlf", "--null-data"]).unwrap();
-    assert_eq!(false, args.crlf);
-    assert_eq!(true, args.null_data);
+    assert!(!args.crlf);
+    assert!(args.null_data);
 
     let args = parse_low_raw(["--null-data", "--crlf"]).unwrap();
-    assert_eq!(true, args.crlf);
-    assert_eq!(false, args.null_data);
+    assert!(args.crlf);
+    assert!(!args.null_data);
 
     let args = parse_low_raw(["--null-data", "--no-crlf"]).unwrap();
-    assert_eq!(false, args.crlf);
-    assert_eq!(true, args.null_data);
+    assert!(!args.crlf);
+    assert!(args.null_data);
 
     let args = parse_low_raw(["--null-data", "--crlf", "--no-crlf"]).unwrap();
-    assert_eq!(false, args.crlf);
-    assert_eq!(false, args.null_data);
+    assert!(!args.crlf);
+    assert!(!args.null_data);
 }
 
 /// --debug
@@ -2321,19 +2321,19 @@ should not need be escaped.
 #[test]
 fn test_fixed_strings() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.fixed_strings);
+    assert!(!args.fixed_strings);
 
     let args = parse_low_raw(["--fixed-strings"]).unwrap();
-    assert_eq!(true, args.fixed_strings);
+    assert!(args.fixed_strings);
 
     let args = parse_low_raw(["-F"]).unwrap();
-    assert_eq!(true, args.fixed_strings);
+    assert!(args.fixed_strings);
 
     let args = parse_low_raw(["-F", "--no-fixed-strings"]).unwrap();
-    assert_eq!(false, args.fixed_strings);
+    assert!(!args.fixed_strings);
 
     let args = parse_low_raw(["--no-fixed-strings", "-F"]).unwrap();
-    assert_eq!(true, args.fixed_strings);
+    assert!(args.fixed_strings);
 }
 
 /// -L/--follow
@@ -2379,19 +2379,19 @@ also report errors for broken links. To suppress error messages, use the
 #[test]
 fn test_follow() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.follow);
+    assert!(!args.follow);
 
     let args = parse_low_raw(["--follow"]).unwrap();
-    assert_eq!(true, args.follow);
+    assert!(args.follow);
 
     let args = parse_low_raw(["-L"]).unwrap();
-    assert_eq!(true, args.follow);
+    assert!(args.follow);
 
     let args = parse_low_raw(["-L", "--no-follow"]).unwrap();
-    assert_eq!(false, args.follow);
+    assert!(!args.follow);
 
     let args = parse_low_raw(["--no-follow", "-L"]).unwrap();
-    assert_eq!(true, args.follow);
+    assert!(args.follow);
 }
 
 /// --generate
@@ -2626,24 +2626,24 @@ This effectively treats \flag{glob} as \flag{iglob}.
 #[test]
 fn test_glob_case_insensitive() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.glob_case_insensitive);
+    assert!(!args.glob_case_insensitive);
 
     let args = parse_low_raw(["--glob-case-insensitive"]).unwrap();
-    assert_eq!(true, args.glob_case_insensitive);
+    assert!(args.glob_case_insensitive);
 
     let args = parse_low_raw([
         "--glob-case-insensitive",
         "--no-glob-case-insensitive",
     ])
     .unwrap();
-    assert_eq!(false, args.glob_case_insensitive);
+    assert!(!args.glob_case_insensitive);
 
     let args = parse_low_raw([
         "--no-glob-case-insensitive",
         "--glob-case-insensitive",
     ])
     .unwrap();
-    assert_eq!(true, args.glob_case_insensitive);
+    assert!(args.glob_case_insensitive);
 }
 
 /// --heading
@@ -2817,19 +2817,19 @@ file.
 #[test]
 fn test_hidden() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.hidden);
+    assert!(!args.hidden);
 
     let args = parse_low_raw(["--hidden"]).unwrap();
-    assert_eq!(true, args.hidden);
+    assert!(args.hidden);
 
     let args = parse_low_raw(["-."]).unwrap();
-    assert_eq!(true, args.hidden);
+    assert!(args.hidden);
 
     let args = parse_low_raw(["-.", "--no-hidden"]).unwrap();
-    assert_eq!(false, args.hidden);
+    assert!(!args.hidden);
 
     let args = parse_low_raw(["--no-hidden", "-."]).unwrap();
-    assert_eq!(true, args.hidden);
+    assert!(args.hidden);
 }
 
 /// --hostname-bin
@@ -3035,7 +3035,7 @@ https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
         });
         static BORROWED: LazyLock<Vec<&'static str>> =
             LazyLock::new(|| CHOICES.iter().map(|name| &**name).collect());
-        &*BORROWED
+        &BORROWED
     }
 
     fn update(&self, v: FlagValue, args: &mut LowArgs) -> anyhow::Result<()> {
@@ -3302,24 +3302,24 @@ useful on case insensitive file systems (such as Windows).
 #[test]
 fn test_ignore_file_case_insensitive() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.ignore_file_case_insensitive);
+    assert!(!args.ignore_file_case_insensitive);
 
     let args = parse_low_raw(["--ignore-file-case-insensitive"]).unwrap();
-    assert_eq!(true, args.ignore_file_case_insensitive);
+    assert!(args.ignore_file_case_insensitive);
 
     let args = parse_low_raw([
         "--ignore-file-case-insensitive",
         "--no-ignore-file-case-insensitive",
     ])
     .unwrap();
-    assert_eq!(false, args.ignore_file_case_insensitive);
+    assert!(!args.ignore_file_case_insensitive);
 
     let args = parse_low_raw([
         "--no-ignore-file-case-insensitive",
         "--ignore-file-case-insensitive",
     ])
     .unwrap();
-    assert_eq!(true, args.ignore_file_case_insensitive);
+    assert!(args.ignore_file_case_insensitive);
 }
 
 /// --include-zero
@@ -3361,13 +3361,13 @@ grep.
 #[test]
 fn test_include_zero() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.include_zero);
+    assert!(!args.include_zero);
 
     let args = parse_low_raw(["--include-zero"]).unwrap();
-    assert_eq!(true, args.include_zero);
+    assert!(args.include_zero);
 
     let args = parse_low_raw(["--include-zero", "--no-include-zero"]).unwrap();
-    assert_eq!(false, args.include_zero);
+    assert!(!args.include_zero);
 }
 
 /// -v/--invert-match
@@ -3416,23 +3416,23 @@ matching lines.
 #[test]
 fn test_invert_match() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.invert_match);
+    assert!(!args.invert_match);
 
     let args = parse_low_raw(["--invert-match"]).unwrap();
-    assert_eq!(true, args.invert_match);
+    assert!(args.invert_match);
 
     let args = parse_low_raw(["-v"]).unwrap();
-    assert_eq!(true, args.invert_match);
+    assert!(args.invert_match);
 
     let args = parse_low_raw(["-v", "--no-invert-match"]).unwrap();
-    assert_eq!(false, args.invert_match);
+    assert!(!args.invert_match);
 }
 
 /// --json
 #[derive(Debug)]
-struct JSON;
+struct Json;
 
-impl Flag for JSON {
+impl Flag for Json {
     fn is_switch(&self) -> bool {
         true
     }
@@ -3500,8 +3500,8 @@ A more complete description of the JSON format used can be found here:
 
     fn update(&self, v: FlagValue, args: &mut LowArgs) -> anyhow::Result<()> {
         if v.unwrap_switch() {
-            args.mode.update(Mode::Search(SearchMode::JSON));
-        } else if matches!(args.mode, Mode::Search(SearchMode::JSON)) {
+            args.mode.update(Mode::Search(SearchMode::Json));
+        } else if matches!(args.mode, Mode::Search(SearchMode::Json)) {
             // --no-json only reverts to the default mode if the mode is
             // JSON, otherwise it's a no-op.
             args.mode.update(Mode::Search(SearchMode::Standard));
@@ -3517,7 +3517,7 @@ fn test_json() {
     assert_eq!(Mode::Search(SearchMode::Standard), args.mode);
 
     let args = parse_low_raw(["--json"]).unwrap();
-    assert_eq!(Mode::Search(SearchMode::JSON), args.mode);
+    assert_eq!(Mode::Search(SearchMode::Json), args.mode);
 
     let args = parse_low_raw(["--json", "--no-json"]).unwrap();
     assert_eq!(Mode::Search(SearchMode::Standard), args.mode);
@@ -3855,15 +3855,15 @@ If the \flag{max-columns} flag is not set, then this has no effect.
 #[test]
 fn test_max_columns_preview() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.max_columns_preview);
+    assert!(!args.max_columns_preview);
 
     let args = parse_low_raw(["--max-columns-preview"]).unwrap();
-    assert_eq!(true, args.max_columns_preview);
+    assert!(args.max_columns_preview);
 
     let args =
         parse_low_raw(["--max-columns-preview", "--no-max-columns-preview"])
             .unwrap();
-    assert_eq!(false, args.max_columns_preview);
+    assert!(!args.max_columns_preview);
 }
 
 /// -m/--max-count
@@ -4194,16 +4194,16 @@ This overrides the \flag{stop-on-nonmatch} flag.
 #[test]
 fn test_multiline() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.multiline);
+    assert!(!args.multiline);
 
     let args = parse_low_raw(["--multiline"]).unwrap();
-    assert_eq!(true, args.multiline);
+    assert!(args.multiline);
 
     let args = parse_low_raw(["-U"]).unwrap();
-    assert_eq!(true, args.multiline);
+    assert!(args.multiline);
 
     let args = parse_low_raw(["-U", "--no-multiline"]).unwrap();
-    assert_eq!(false, args.multiline);
+    assert!(!args.multiline);
 }
 
 /// --multiline-dotall
@@ -4258,14 +4258,14 @@ regardless of whether "dot all" mode is enabled or not.
 #[test]
 fn test_multiline_dotall() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.multiline_dotall);
+    assert!(!args.multiline_dotall);
 
     let args = parse_low_raw(["--multiline-dotall"]).unwrap();
-    assert_eq!(true, args.multiline_dotall);
+    assert!(args.multiline_dotall);
 
     let args = parse_low_raw(["--multiline-dotall", "--no-multiline-dotall"])
         .unwrap();
-    assert_eq!(false, args.multiline_dotall);
+    assert!(!args.multiline_dotall);
 }
 
 /// --no-config
@@ -4307,10 +4307,10 @@ pre-defined locations, then this flag will also disable that behavior as well.
 #[test]
 fn test_no_config() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_config);
+    assert!(!args.no_config);
 
     let args = parse_low_raw(["--no-config"]).unwrap();
-    assert_eq!(true, args.no_config);
+    assert!(args.no_config);
 }
 
 /// --no-ignore
@@ -4364,25 +4364,25 @@ behavior to this flag and can be considered an alias. However, subsequent
 #[test]
 fn test_no_ignore() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_ignore_dot);
-    assert_eq!(false, args.no_ignore_exclude);
-    assert_eq!(false, args.no_ignore_global);
-    assert_eq!(false, args.no_ignore_parent);
-    assert_eq!(false, args.no_ignore_vcs);
+    assert!(!args.no_ignore_dot);
+    assert!(!args.no_ignore_exclude);
+    assert!(!args.no_ignore_global);
+    assert!(!args.no_ignore_parent);
+    assert!(!args.no_ignore_vcs);
 
     let args = parse_low_raw(["--no-ignore"]).unwrap();
-    assert_eq!(true, args.no_ignore_dot);
-    assert_eq!(true, args.no_ignore_exclude);
-    assert_eq!(true, args.no_ignore_global);
-    assert_eq!(true, args.no_ignore_parent);
-    assert_eq!(true, args.no_ignore_vcs);
+    assert!(args.no_ignore_dot);
+    assert!(args.no_ignore_exclude);
+    assert!(args.no_ignore_global);
+    assert!(args.no_ignore_parent);
+    assert!(args.no_ignore_vcs);
 
     let args = parse_low_raw(["--no-ignore", "--ignore"]).unwrap();
-    assert_eq!(false, args.no_ignore_dot);
-    assert_eq!(false, args.no_ignore_exclude);
-    assert_eq!(false, args.no_ignore_global);
-    assert_eq!(false, args.no_ignore_parent);
-    assert_eq!(false, args.no_ignore_vcs);
+    assert!(!args.no_ignore_dot);
+    assert!(!args.no_ignore_exclude);
+    assert!(!args.no_ignore_global);
+    assert!(!args.no_ignore_parent);
+    assert!(!args.no_ignore_vcs);
 }
 
 /// --no-ignore-dot
@@ -4425,13 +4425,13 @@ does not impact whether filter rules from \fB.gitignore\fP files are respected.
 #[test]
 fn test_no_ignore_dot() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_ignore_dot);
+    assert!(!args.no_ignore_dot);
 
     let args = parse_low_raw(["--no-ignore-dot"]).unwrap();
-    assert_eq!(true, args.no_ignore_dot);
+    assert!(args.no_ignore_dot);
 
     let args = parse_low_raw(["--no-ignore-dot", "--ignore-dot"]).unwrap();
-    assert_eq!(false, args.no_ignore_dot);
+    assert!(!args.no_ignore_dot);
 }
 
 /// --no-ignore-exclude
@@ -4471,14 +4471,14 @@ For example, this includes \fBgit\fP's \fB.git/info/exclude\fP.
 #[test]
 fn test_no_ignore_exclude() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_ignore_exclude);
+    assert!(!args.no_ignore_exclude);
 
     let args = parse_low_raw(["--no-ignore-exclude"]).unwrap();
-    assert_eq!(true, args.no_ignore_exclude);
+    assert!(args.no_ignore_exclude);
 
     let args =
         parse_low_raw(["--no-ignore-exclude", "--ignore-exclude"]).unwrap();
-    assert_eq!(false, args.no_ignore_exclude);
+    assert!(!args.no_ignore_exclude);
 }
 
 /// --no-ignore-files
@@ -4518,13 +4518,13 @@ are ignored.
 #[test]
 fn test_no_ignore_files() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_ignore_files);
+    assert!(!args.no_ignore_files);
 
     let args = parse_low_raw(["--no-ignore-files"]).unwrap();
-    assert_eq!(true, args.no_ignore_files);
+    assert!(args.no_ignore_files);
 
     let args = parse_low_raw(["--no-ignore-files", "--ignore-files"]).unwrap();
-    assert_eq!(false, args.no_ignore_files);
+    assert!(!args.no_ignore_files);
 }
 
 /// --no-ignore-global
@@ -4565,14 +4565,14 @@ defaults to \fB$HOME/.config/git/ignore\fP).
 #[test]
 fn test_no_ignore_global() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_ignore_global);
+    assert!(!args.no_ignore_global);
 
     let args = parse_low_raw(["--no-ignore-global"]).unwrap();
-    assert_eq!(true, args.no_ignore_global);
+    assert!(args.no_ignore_global);
 
     let args =
         parse_low_raw(["--no-ignore-global", "--ignore-global"]).unwrap();
-    assert_eq!(false, args.no_ignore_global);
+    assert!(!args.no_ignore_global);
 }
 
 /// --no-ignore-messages
@@ -4614,14 +4614,14 @@ noise produced by the messages.
 #[test]
 fn test_no_ignore_messages() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_ignore_messages);
+    assert!(!args.no_ignore_messages);
 
     let args = parse_low_raw(["--no-ignore-messages"]).unwrap();
-    assert_eq!(true, args.no_ignore_messages);
+    assert!(args.no_ignore_messages);
 
     let args =
         parse_low_raw(["--no-ignore-messages", "--ignore-messages"]).unwrap();
-    assert_eq!(false, args.no_ignore_messages);
+    assert!(!args.no_ignore_messages);
 }
 
 /// --no-ignore-parent
@@ -4663,14 +4663,14 @@ files that should be applied. In some cases this may not be desirable.
 #[test]
 fn test_no_ignore_parent() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_ignore_parent);
+    assert!(!args.no_ignore_parent);
 
     let args = parse_low_raw(["--no-ignore-parent"]).unwrap();
-    assert_eq!(true, args.no_ignore_parent);
+    assert!(args.no_ignore_parent);
 
     let args =
         parse_low_raw(["--no-ignore-parent", "--ignore-parent"]).unwrap();
-    assert_eq!(false, args.no_ignore_parent);
+    assert!(!args.no_ignore_parent);
 }
 
 /// --no-ignore-vcs
@@ -4720,13 +4720,13 @@ well.
 #[test]
 fn test_no_ignore_vcs() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_ignore_vcs);
+    assert!(!args.no_ignore_vcs);
 
     let args = parse_low_raw(["--no-ignore-vcs"]).unwrap();
-    assert_eq!(true, args.no_ignore_vcs);
+    assert!(args.no_ignore_vcs);
 
     let args = parse_low_raw(["--no-ignore-vcs", "--ignore-vcs"]).unwrap();
-    assert_eq!(false, args.no_ignore_vcs);
+    assert!(!args.no_ignore_vcs);
 }
 
 /// --no-messages
@@ -4767,13 +4767,13 @@ of the pattern are still shown.
 #[test]
 fn test_no_messages() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_messages);
+    assert!(!args.no_messages);
 
     let args = parse_low_raw(["--no-messages"]).unwrap();
-    assert_eq!(true, args.no_messages);
+    assert!(args.no_messages);
 
     let args = parse_low_raw(["--no-messages", "--messages"]).unwrap();
-    assert_eq!(false, args.no_messages);
+    assert!(!args.no_messages);
 }
 
 /// --no-pcre2-unicode
@@ -4814,14 +4814,14 @@ Note that Unicode mode is enabled by default.
 #[test]
 fn test_no_pcre2_unicode() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_unicode);
+    assert!(!args.no_unicode);
 
     let args = parse_low_raw(["--no-pcre2-unicode"]).unwrap();
-    assert_eq!(true, args.no_unicode);
+    assert!(args.no_unicode);
 
     let args =
         parse_low_raw(["--no-pcre2-unicode", "--pcre2-unicode"]).unwrap();
-    assert_eq!(false, args.no_unicode);
+    assert!(!args.no_unicode);
 }
 
 /// --no-require-git
@@ -4869,13 +4869,13 @@ where the repository state is absent.
 #[test]
 fn test_no_require_git() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_require_git);
+    assert!(!args.no_require_git);
 
     let args = parse_low_raw(["--no-require-git"]).unwrap();
-    assert_eq!(true, args.no_require_git);
+    assert!(args.no_require_git);
 
     let args = parse_low_raw(["--no-require-git", "--require-git"]).unwrap();
-    assert_eq!(false, args.no_require_git);
+    assert!(!args.no_require_git);
 }
 
 /// --no-unicode
@@ -4942,19 +4942,19 @@ interpretation is needed.
 #[test]
 fn test_no_unicode() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_unicode);
+    assert!(!args.no_unicode);
 
     let args = parse_low_raw(["--no-unicode"]).unwrap();
-    assert_eq!(true, args.no_unicode);
+    assert!(args.no_unicode);
 
     let args = parse_low_raw(["--no-unicode", "--unicode"]).unwrap();
-    assert_eq!(false, args.no_unicode);
+    assert!(!args.no_unicode);
 
     let args = parse_low_raw(["--no-unicode", "--pcre2-unicode"]).unwrap();
-    assert_eq!(false, args.no_unicode);
+    assert!(!args.no_unicode);
 
     let args = parse_low_raw(["--no-pcre2-unicode", "--unicode"]).unwrap();
-    assert_eq!(false, args.no_unicode);
+    assert!(!args.no_unicode);
 }
 
 /// -0/--null
@@ -4997,13 +4997,13 @@ option is useful for use with \fBxargs\fP.
 #[test]
 fn test_null() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.null);
+    assert!(!args.null);
 
     let args = parse_low_raw(["--null"]).unwrap();
-    assert_eq!(true, args.null);
+    assert!(args.null);
 
     let args = parse_low_raw(["-0"]).unwrap();
-    assert_eq!(true, args.null);
+    assert!(args.null);
 }
 
 /// --null-data
@@ -5053,22 +5053,22 @@ Using this flag implies \flag{text}. It also overrides \flag{crlf}.
 #[test]
 fn test_null_data() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.null_data);
+    assert!(!args.null_data);
 
     let args = parse_low_raw(["--null-data"]).unwrap();
-    assert_eq!(true, args.null_data);
+    assert!(args.null_data);
 
     let args = parse_low_raw(["--null-data", "--crlf"]).unwrap();
-    assert_eq!(false, args.null_data);
-    assert_eq!(true, args.crlf);
+    assert!(!args.null_data);
+    assert!(args.crlf);
 
     let args = parse_low_raw(["--crlf", "--null-data"]).unwrap();
-    assert_eq!(true, args.null_data);
-    assert_eq!(false, args.crlf);
+    assert!(args.null_data);
+    assert!(!args.crlf);
 
     let args = parse_low_raw(["--null-data", "--no-crlf"]).unwrap();
-    assert_eq!(true, args.null_data);
-    assert_eq!(false, args.crlf);
+    assert!(args.null_data);
+    assert!(!args.crlf);
 }
 
 /// --one-file-system
@@ -5121,14 +5121,14 @@ This is similar to \fBfind\fP's \fB\-xdev\fP or \fB\-mount\fP flag.
 #[test]
 fn test_one_file_system() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.one_file_system);
+    assert!(!args.one_file_system);
 
     let args = parse_low_raw(["--one-file-system"]).unwrap();
-    assert_eq!(true, args.one_file_system);
+    assert!(args.one_file_system);
 
     let args =
         parse_low_raw(["--one-file-system", "--no-one-file-system"]).unwrap();
-    assert_eq!(false, args.one_file_system);
+    assert!(!args.one_file_system);
 }
 
 /// -o/--only-matching
@@ -5169,13 +5169,13 @@ part on a separate output line.
 #[test]
 fn test_only_matching() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.only_matching);
+    assert!(!args.only_matching);
 
     let args = parse_low_raw(["--only-matching"]).unwrap();
-    assert_eq!(true, args.only_matching);
+    assert!(args.only_matching);
 
     let args = parse_low_raw(["-o"]).unwrap();
-    assert_eq!(true, args.only_matching);
+    assert!(args.only_matching);
 }
 
 /// --path-separator
@@ -5731,29 +5731,29 @@ first file that does not match any ignore rules.
 #[test]
 fn test_quiet() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.quiet);
+    assert!(!args.quiet);
 
     let args = parse_low_raw(["--quiet"]).unwrap();
-    assert_eq!(true, args.quiet);
+    assert!(args.quiet);
 
     let args = parse_low_raw(["-q"]).unwrap();
-    assert_eq!(true, args.quiet);
+    assert!(args.quiet);
 
     // flags like -l and --json cannot override -q, regardless of order
     let args = parse_low_raw(["-q", "--json"]).unwrap();
-    assert_eq!(true, args.quiet);
+    assert!(args.quiet);
 
     let args = parse_low_raw(["-q", "--files-with-matches"]).unwrap();
-    assert_eq!(true, args.quiet);
+    assert!(args.quiet);
 
     let args = parse_low_raw(["-q", "--files-without-match"]).unwrap();
-    assert_eq!(true, args.quiet);
+    assert!(args.quiet);
 
     let args = parse_low_raw(["-q", "--count"]).unwrap();
-    assert_eq!(true, args.quiet);
+    assert!(args.quiet);
 
     let args = parse_low_raw(["-q", "--count-matches"]).unwrap();
-    assert_eq!(true, args.quiet);
+    assert!(args.quiet);
 }
 
 /// --regex-size-limit
@@ -6109,28 +6109,28 @@ This overrides the \flag{pre} flag.
 #[test]
 fn test_search_zip() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.search_zip);
+    assert!(!args.search_zip);
 
     let args = parse_low_raw(["--search-zip"]).unwrap();
-    assert_eq!(true, args.search_zip);
+    assert!(args.search_zip);
 
     let args = parse_low_raw(["-z"]).unwrap();
-    assert_eq!(true, args.search_zip);
+    assert!(args.search_zip);
 
     let args = parse_low_raw(["-z", "--no-search-zip"]).unwrap();
-    assert_eq!(false, args.search_zip);
+    assert!(!args.search_zip);
 
     let args = parse_low_raw(["--pre=foo", "--no-search-zip"]).unwrap();
     assert_eq!(Some(PathBuf::from("foo")), args.pre);
-    assert_eq!(false, args.search_zip);
+    assert!(!args.search_zip);
 
     let args = parse_low_raw(["--pre=foo", "--search-zip"]).unwrap();
     assert_eq!(None, args.pre);
-    assert_eq!(true, args.search_zip);
+    assert!(args.search_zip);
 
     let args = parse_low_raw(["--pre=foo", "-z", "--no-search-zip"]).unwrap();
     assert_eq!(None, args.pre);
-    assert_eq!(false, args.search_zip);
+    assert!(!args.search_zip);
 }
 
 /// -S/--smart-case
@@ -6555,13 +6555,13 @@ Note that this flag has no effect if \flag{files}, \flag{files-with-matches} or
 #[test]
 fn test_stats() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.stats);
+    assert!(!args.stats);
 
     let args = parse_low_raw(["--stats"]).unwrap();
-    assert_eq!(true, args.stats);
+    assert!(args.stats);
 
     let args = parse_low_raw(["--stats", "--no-stats"]).unwrap();
-    assert_eq!(false, args.stats);
+    assert!(!args.stats);
 }
 
 /// --stop-on-nonmatch
@@ -6604,23 +6604,23 @@ This overrides the \flag{multiline} flag.
 #[test]
 fn test_stop_on_nonmatch() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.stop_on_nonmatch);
+    assert!(!args.stop_on_nonmatch);
 
     let args = parse_low_raw(["--stop-on-nonmatch"]).unwrap();
-    assert_eq!(true, args.stop_on_nonmatch);
+    assert!(args.stop_on_nonmatch);
 
     let args = parse_low_raw(["--stop-on-nonmatch", "-U"]).unwrap();
-    assert_eq!(true, args.multiline);
-    assert_eq!(false, args.stop_on_nonmatch);
+    assert!(args.multiline);
+    assert!(!args.stop_on_nonmatch);
 
     let args = parse_low_raw(["-U", "--stop-on-nonmatch"]).unwrap();
-    assert_eq!(false, args.multiline);
-    assert_eq!(true, args.stop_on_nonmatch);
+    assert!(!args.multiline);
+    assert!(args.stop_on_nonmatch);
 
     let args =
         parse_low_raw(["--stop-on-nonmatch", "--no-multiline"]).unwrap();
-    assert_eq!(false, args.multiline);
-    assert_eq!(true, args.stop_on_nonmatch);
+    assert!(!args.multiline);
+    assert!(args.stop_on_nonmatch);
 }
 
 /// -a/--text
@@ -6845,13 +6845,13 @@ removed.
 #[test]
 fn test_trim() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.trim);
+    assert!(!args.trim);
 
     let args = parse_low_raw(["--trim"]).unwrap();
-    assert_eq!(true, args.trim);
+    assert!(args.trim);
 
     let args = parse_low_raw(["--trim", "--no-trim"]).unwrap();
-    assert_eq!(false, args.trim);
+    assert!(!args.trim);
 }
 
 /// -t/--type
@@ -7263,23 +7263,23 @@ text files via the \flag{text} flag.
 #[test]
 fn test_unrestricted() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.no_ignore_vcs);
-    assert_eq!(false, args.hidden);
+    assert!(!args.no_ignore_vcs);
+    assert!(!args.hidden);
     assert_eq!(BinaryMode::Auto, args.binary);
 
     let args = parse_low_raw(["--unrestricted"]).unwrap();
-    assert_eq!(true, args.no_ignore_vcs);
-    assert_eq!(false, args.hidden);
+    assert!(args.no_ignore_vcs);
+    assert!(!args.hidden);
     assert_eq!(BinaryMode::Auto, args.binary);
 
     let args = parse_low_raw(["--unrestricted", "-u"]).unwrap();
-    assert_eq!(true, args.no_ignore_vcs);
-    assert_eq!(true, args.hidden);
+    assert!(args.no_ignore_vcs);
+    assert!(args.hidden);
     assert_eq!(BinaryMode::Auto, args.binary);
 
     let args = parse_low_raw(["-uuu"]).unwrap();
-    assert_eq!(true, args.no_ignore_vcs);
-    assert_eq!(true, args.hidden);
+    assert!(args.no_ignore_vcs);
+    assert!(args.hidden);
     assert_eq!(BinaryMode::SearchAndSuppress, args.binary);
 
     let result = parse_low_raw(["-uuuu"]);
@@ -7392,10 +7392,10 @@ use.
 #[test]
 fn test_vimgrep() {
     let args = parse_low_raw(None::<&str>).unwrap();
-    assert_eq!(false, args.vimgrep);
+    assert!(!args.vimgrep);
 
     let args = parse_low_raw(["--vimgrep"]).unwrap();
-    assert_eq!(true, args.vimgrep);
+    assert!(args.vimgrep);
 }
 
 /// --with-filename
@@ -7615,7 +7615,7 @@ mod tests {
 
     #[test]
     fn available_shorts() {
-        let mut total = vec![false; 128];
+        let mut total = [false; 128];
         for byte in 0..=0x7F {
             match byte {
                 b'.' | b'0'..=b'9' | b'A'..=b'Z' | b'a'..=b'z' => {
@@ -7625,7 +7625,7 @@ mod tests {
             }
         }
 
-        let mut taken = vec![false; 128];
+        let mut taken = [false; 128];
         for flag in FLAGS.iter() {
             let Some(short) = flag.name_short() else { continue };
             taken[usize::from(short)] = true;
@@ -7692,7 +7692,7 @@ mod tests {
 
     #[test]
     fn shorts_no_duplicates() {
-        let mut taken = vec![false; 128];
+        let mut taken = [false; 128];
         for flag in FLAGS.iter() {
             let Some(short) = flag.name_short() else { continue };
             let long = flag.name_long();

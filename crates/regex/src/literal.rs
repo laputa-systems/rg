@@ -69,14 +69,14 @@ impl InnerLiterals {
         // If it does, there's enough of a chance of the regex engine falling
         // back to a slower engine that it's worth trying our own inner literal
         // optimization.
-        if re.is_accelerated() {
-            if !chir.hir().properties().look_set().contains_word_unicode() {
-                log::trace!(
-                    "skipping inner literal extraction, \
-                     existing regex is believed to already be accelerated",
-                );
-                return InnerLiterals::none();
-            }
+        if re.is_accelerated()
+            && !chir.hir().properties().look_set().contains_word_unicode()
+        {
+            log::trace!(
+                "skipping inner literal extraction, \
+                 existing regex is believed to already be accelerated",
+            );
+            return InnerLiterals::none();
         }
         // In this case, we pretty much know that the regex engine will handle
         // it as best as possible, even if it isn't reported as accelerated.
@@ -382,12 +382,12 @@ impl Extractor {
         }
         if seq1
             .max_cross_len(&seq2)
-            .map_or(false, |len| len > self.limit_total)
+            .is_some_and(|len| len > self.limit_total)
         {
             seq2.make_infinite();
         }
         seq1.cross_forward(&mut seq2);
-        assert!(seq1.len().map_or(true, |x| x <= self.limit_total));
+        assert!(seq1.len().is_none_or(|x| x <= self.limit_total));
         self.enforce_literal_len(&mut seq1);
         seq1
     }
@@ -396,7 +396,7 @@ impl Extractor {
     /// limits. Otherwise, make `seq2` infinite and union the infinite sequence
     /// with `seq1`.
     fn union(&self, mut seq1: TSeq, seq2: &mut TSeq) -> TSeq {
-        if seq1.max_union_len(seq2).map_or(false, |len| len > self.limit_total)
+        if seq1.max_union_len(seq2).is_some_and(|len| len > self.limit_total)
         {
             // We try to trim our literal sequences to see if we can make
             // room for more literals. The idea is that we'd rather trim down
@@ -418,13 +418,13 @@ impl Extractor {
             seq2.dedup();
             if seq1
                 .max_union_len(seq2)
-                .map_or(false, |len| len > self.limit_total)
+                .is_some_and(|len| len > self.limit_total)
             {
                 seq2.make_infinite();
             }
         }
         seq1.union(seq2);
-        assert!(seq1.len().map_or(true, |x| x <= self.limit_total));
+        assert!(seq1.len().is_none_or(|x| x <= self.limit_total));
         seq1.prefix = seq1.prefix && seq2.prefix;
         seq1
     }

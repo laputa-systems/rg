@@ -16,7 +16,7 @@ use log::Log;
 pub(crate) struct Logger(());
 
 /// A singleton used as the target for an implementation of the `Log` trait.
-const LOGGER: &'static Logger = &Logger(());
+const LOGGER: &Logger = &Logger(());
 
 impl Logger {
     /// Create a new logger that logs to stderr and initialize it as the

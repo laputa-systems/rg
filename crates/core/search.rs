@@ -207,7 +207,7 @@ pub(crate) enum Printer<W> {
     /// results.
     Summary(grep::printer::Summary<W>),
     /// A JSON printer, which emits results in the JSON Lines format.
-    JSON(grep::printer::JSON<W>),
+    Json(grep::printer::JSON<W>),
 }
 
 impl<W: WriteColor> Printer<W> {
@@ -216,7 +216,7 @@ impl<W: WriteColor> Printer<W> {
         match *self {
             Printer::Standard(ref mut p) => p.get_mut(),
             Printer::Summary(ref mut p) => p.get_mut(),
-            Printer::JSON(ref mut p) => p.get_mut(),
+            Printer::Json(ref mut p) => p.get_mut(),
         }
     }
 }
@@ -302,18 +302,14 @@ impl<W: WriteColor> SearchWorker<W> {
         cmd.arg(path).stdin(Stdio::from(File::open(path)?));
 
         let mut rdr = self.command_builder.build(&mut cmd).map_err(|err| {
-            io::Error::new(
-                io::ErrorKind::Other,
-                format!(
-                    "preprocessor command could not start: '{cmd:?}': {err}",
-                ),
-            )
+            io::Error::other(format!(
+                "preprocessor command could not start: '{cmd:?}': {err}",
+            ))
         })?;
         let result = self.search_reader(path, &mut rdr).map_err(|err| {
-            io::Error::new(
-                io::ErrorKind::Other,
-                format!("preprocessor command failed: '{cmd:?}': {err}"),
-            )
+            io::Error::other(format!(
+                "preprocessor command failed: '{cmd:?}': {err}"
+            ))
         });
         let close_result = rdr.close();
         let search_result = result?;
@@ -398,7 +394,7 @@ fn search_path<M: Matcher, W: WriteColor>(
                 stats: sink.stats().cloned(),
             })
         }
-        Printer::JSON(ref mut p) => {
+        Printer::Json(ref mut p) => {
             let mut sink = p.sink_with_path(&matcher, path);
             searcher.search_path(&matcher, path, &mut sink)?;
             Ok(SearchResult {
@@ -435,7 +431,7 @@ fn search_reader<M: Matcher, R: io::Read, W: WriteColor>(
                 stats: sink.stats().cloned(),
             })
         }
-        Printer::JSON(ref mut p) => {
+        Printer::Json(ref mut p) => {
             let mut sink = p.sink_with_path(&matcher, path);
             searcher.search_reader(&matcher, &mut rdr, &mut sink)?;
             Ok(SearchResult {

@@ -202,7 +202,7 @@ enum LineTerminatorImp {
     ///
     /// When this option is used, consumers may generally treat a lone `\n` as
     /// a line terminator in addition to `\r\n`.
-    CRLF,
+    Crlf,
 }
 
 impl LineTerminator {
@@ -218,13 +218,13 @@ impl LineTerminator {
     /// a line terminator in addition to `\r\n`.
     #[inline]
     pub fn crlf() -> LineTerminator {
-        LineTerminator(LineTerminatorImp::CRLF)
+        LineTerminator(LineTerminatorImp::Crlf)
     }
 
     /// Returns true if and only if this line terminator is CRLF.
     #[inline]
     pub fn is_crlf(&self) -> bool {
-        self.0 == LineTerminatorImp::CRLF
+        self.0 == LineTerminatorImp::Crlf
     }
 
     /// Returns this line terminator as a single byte.
@@ -236,7 +236,7 @@ impl LineTerminator {
     pub fn as_byte(&self) -> u8 {
         match self.0 {
             LineTerminatorImp::Byte(byte) => byte,
-            LineTerminatorImp::CRLF => b'\n',
+            LineTerminatorImp::Crlf => b'\n',
         }
     }
 
@@ -250,7 +250,7 @@ impl LineTerminator {
     pub fn as_bytes(&self) -> &[u8] {
         match self.0 {
             LineTerminatorImp::Byte(ref byte) => std::slice::from_ref(byte),
-            LineTerminatorImp::CRLF => &[b'\r', b'\n'],
+            LineTerminatorImp::Crlf => b"\r\n",
         }
     }
 
@@ -261,7 +261,7 @@ impl LineTerminator {
     /// last byte is `\n`.
     #[inline]
     pub fn is_suffix(&self, slice: &[u8]) -> bool {
-        slice.last().map_or(false, |&b| b == self.as_byte())
+        slice.last().is_some_and(|&b| b == self.as_byte())
     }
 }
 
@@ -471,6 +471,13 @@ impl NoCaptures {
     /// Create an empty set of capturing groups.
     #[inline]
     pub fn new() -> NoCaptures {
+        NoCaptures::default()
+    }
+}
+
+impl Default for NoCaptures {
+    #[inline]
+    fn default() -> NoCaptures {
         NoCaptures(())
     }
 }
@@ -1130,7 +1137,7 @@ pub trait Matcher {
     }
 }
 
-impl<'a, M: Matcher> Matcher for &'a M {
+impl<M: Matcher> Matcher for &M {
     type Captures = M::Captures;
     type Error = M::Error;
 

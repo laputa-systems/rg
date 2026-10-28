@@ -210,7 +210,7 @@ pub(crate) enum SearchMode {
     /// matches.
     CountMatches,
     /// Print matches in a JSON lines format.
-    JSON,
+    Json,
 }
 
 /// The thing to generate via the --generate flag.

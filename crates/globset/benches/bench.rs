@@ -8,14 +8,14 @@ extern crate test;
 
 use globset::{Candidate, Glob, GlobMatcher, GlobSet, GlobSetBuilder};
 
-const EXT: &'static str = "some/a/bigger/path/to/the/crazy/needle.txt";
-const EXT_PAT: &'static str = "*.txt";
+const EXT: &str = "some/a/bigger/path/to/the/crazy/needle.txt";
+const EXT_PAT: &str = "*.txt";
 
-const SHORT: &'static str = "some/needle.txt";
-const SHORT_PAT: &'static str = "some/**/needle.txt";
+const SHORT: &str = "some/needle.txt";
+const SHORT_PAT: &str = "some/**/needle.txt";
 
-const LONG: &'static str = "some/a/bigger/path/to/the/crazy/needle.txt";
-const LONG_PAT: &'static str = "some/**/needle.txt";
+const LONG: &str = "some/a/bigger/path/to/the/crazy/needle.txt";
+const LONG_PAT: &str = "some/**/needle.txt";
 
 fn new_glob(pat: &str) -> glob::Pattern {
     glob::Pattern::new(pat).unwrap()
@@ -72,7 +72,7 @@ fn long_regex(b: &mut test::Bencher) {
     b.iter(|| assert!(set.is_match_candidate(&cand)));
 }
 
-const MANY_SHORT_GLOBS: &'static [&'static str] = &[
+const MANY_SHORT_GLOBS: &[&str] = &[
     // Taken from a random .gitignore on my system.
     ".*.swp",
     "tags",
@@ -90,7 +90,7 @@ const MANY_SHORT_GLOBS: &'static [&'static str] = &[
     "months",
 ];
 
-const MANY_SHORT_SEARCH: &'static str = "98m-blah.csv.idx";
+const MANY_SHORT_SEARCH: &str = "98m-blah.csv.idx";
 
 #[bench]
 fn many_short_glob(b: &mut test::Bencher) {
@@ -109,5 +109,5 @@ fn many_short_glob(b: &mut test::Bencher) {
 #[bench]
 fn many_short_regex_set(b: &mut test::Bencher) {
     let set = new_reglob_many(MANY_SHORT_GLOBS);
-    b.iter(|| assert_eq!(2, set.matches(MANY_SHORT_SEARCH).iter().count()));
+    b.iter(|| assert_eq!(2, set.matches(MANY_SHORT_SEARCH).len()));
 }

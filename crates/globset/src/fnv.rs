@@ -23,7 +23,7 @@ impl std::hash::Hasher for Hasher {
 
     fn write(&mut self, bytes: &[u8]) {
         for &byte in bytes.iter() {
-            self.0 = self.0 ^ u64::from(byte);
+            self.0 ^= u64::from(byte);
             self.0 = self.0.wrapping_mul(Hasher::PRIME);
         }
     }

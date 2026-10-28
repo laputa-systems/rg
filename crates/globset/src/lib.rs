@@ -204,7 +204,7 @@ impl std::error::Error for Error {
 impl Error {
     /// Return the glob that caused this error, if one exists.
     pub fn glob(&self) -> Option<&str> {
-        self.glob.as_ref().map(|s| &**s)
+        self.glob.as_deref()
     }
 
     /// Return the kind of this error.
@@ -562,7 +562,7 @@ impl Default for GlobSet {
 
 /// GlobSetBuilder builds a group of patterns that can be used to
 /// simultaneously match a file path.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct GlobSetBuilder {
     pats: Vec<Glob>,
 }
@@ -572,7 +572,7 @@ impl GlobSetBuilder {
     /// patterns. Once all patterns have been added, `build` should be called
     /// to produce a [`GlobSet`], which can then be used for matching.
     pub fn new() -> GlobSetBuilder {
-        GlobSetBuilder { pats: vec![] }
+        GlobSetBuilder::default()
     }
 
     /// Builds a new matcher from all of the glob patterns added so far.
@@ -638,12 +638,12 @@ impl<'a> Candidate<'a> {
     }
 
     fn path_prefix(&self, max: usize) -> &[u8] {
-        if self.path.len() <= max { &*self.path } else { &self.path[..max] }
+        if self.path.len() <= max { &self.path } else { &self.path[..max] }
     }
 
     fn path_suffix(&self, max: usize) -> &[u8] {
         if self.path.len() <= max {
-            &*self.path
+            &self.path
         } else {
             &self.path[self.path.len() - max..]
         }
@@ -901,7 +901,7 @@ impl RequiredExtensionStrategy {
         match self.0.get(candidate.ext.as_bytes()) {
             None => false,
             Some(regexes) => {
-                for &(_, ref re) in regexes {
+                for (_, re) in regexes {
                     if re.is_match(candidate.path.as_bytes()) {
                         return true;
                     }
@@ -916,7 +916,7 @@ impl RequiredExtensionStrategy {
             return false;
         }
         if let Some(regexes) = self.0.get(candidate.ext.as_bytes()) {
-            for &(_, ref re) in regexes {
+            for (_, re) in regexes {
                 if !re.is_match(candidate.path.as_bytes()) {
                     return false;
                 }

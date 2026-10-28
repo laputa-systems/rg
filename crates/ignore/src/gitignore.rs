@@ -45,7 +45,7 @@ pub struct Glob {
 impl Glob {
     /// Returns the file path that defined this glob.
     pub fn from(&self) -> Option<&Path> {
-        self.from.as_ref().map(|p| &**p)
+        self.from.as_deref()
     }
 
     /// The original glob as it was defined in a gitignore file.
@@ -163,7 +163,7 @@ impl Gitignore {
     ///
     /// All matches are done relative to this path.
     pub fn path(&self) -> &Path {
-        &*self.root
+        &self.root
     }
 
     /// Returns true if and only if this gitignore has zero globs, and
@@ -267,7 +267,7 @@ impl Gitignore {
         let path = path.as_ref();
         let mut matches = self.matches.as_ref().unwrap().get();
         let candidate = Candidate::new(path);
-        self.set.matches_candidate_into(&candidate, &mut *matches);
+        self.set.matches_candidate_into(&candidate, &mut matches);
         for &i in matches.iter().rev() {
             let glob = &self.globs[i];
             if !glob.is_only_dir() || is_dir {
@@ -302,13 +302,14 @@ impl Gitignore {
         //
         // As an additional special case, if the root is just `.`, then we
         // shouldn't try to strip anything, e.g., when path begins with a `.`.
-        if self.root != Path::new(".") && !is_file_name(path) {
-            if let Some(p) = strip_prefix(&self.root, path) {
+        if self.root != Path::new(".")
+            && !is_file_name(path)
+            && let Some(p) = strip_prefix(&self.root, path)
+        {
+            path = p;
+            // If we're left with a leading slash, get rid of it.
+            if let Some(p) = strip_prefix("/", path) {
                 path = p;
-                // If we're left with a leading slash, get rid of it.
-                if let Some(p) = strip_prefix("/", path) {
-                    path = p;
-                }
             }
         }
         path
@@ -363,7 +364,7 @@ impl GitignoreBuilder {
             num_ignores: nignore as u64,
             num_whitelists: nwhite as u64,
             matches: Some(Arc::new(
-                Pool::with_available_parallelism_capacity(|| vec![]),
+                Pool::with_available_parallelism_capacity(Vec::new),
             )),
         })
     }
@@ -427,9 +428,9 @@ impl GitignoreBuilder {
             // Match Git's handling of .gitignore files that begin with the Unicode BOM
             const UTF8_BOM: &str = "\u{feff}";
             let line =
-                if i == 0 { line.trim_start_matches(UTF8_BOM) } else { &line };
+                if i == 0 { line.trim_start_matches(UTF8_BOM) } else { line.as_str() };
 
-            if let Err(err) = self.add_line(Some(path.to_path_buf()), &line) {
+            if let Err(err) = self.add_line(Some(path.to_path_buf()), line) {
                 errs.push(err.tagged(path, lineno));
             }
         }
@@ -744,7 +745,7 @@ mod tests {
         };
     }
 
-    const ROOT: &'static str = "/home/foobar/rust/rg";
+    const ROOT: &str = "/home/foobar/rust/rg";
 
     ignored!(ig1, ROOT, "months", "months");
     ignored!(ig2, ROOT, "*.lock", "Cargo.lock");

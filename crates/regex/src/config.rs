@@ -133,10 +133,10 @@ impl Config {
             // Same deal as when fixed_strings is set above. If the pattern has
             // a line terminator anywhere, then we need to bail out and let
             // an error occur.
-            if let Some(lineterm) = self.line_terminator {
-                if has_line_terminator(lineterm, p) {
-                    return false;
-                }
+            if let Some(lineterm) = self.line_terminator
+                && has_line_terminator(lineterm, p)
+            {
+                return false;
             }
         }
         true
@@ -176,8 +176,7 @@ impl ConfiguredHIR {
                 "assembling HIR from {} fixed string literals",
                 alts.len()
             );
-            let hir = Hir::alternation(alts);
-            hir
+            Hir::alternation(alts)
         } else {
             let mut alts = vec![];
             for p in patterns.iter() {
@@ -250,7 +249,7 @@ impl ConfiguredHIR {
             // Same deal here. The default limit for full DFAs is VERY small,
             // but with ripgrep we can afford to spend a bit more time on
             // building them I think.
-            .dfa_size_limit(Some(1 * (1 << 20)))
+            .dfa_size_limit(Some(1 << 20))
             .dfa_state_limit(Some(1_000))
             .hybrid_cache_capacity(self.config.dfa_size_limit);
         Regex::builder()

@@ -2,7 +2,7 @@ use std::path::Path;
 
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 
-const IGNORE_FILE: &'static str =
+const IGNORE_FILE: &str =
     "tests/gitignore_matched_path_or_any_parents_tests.gitignore";
 
 fn get_gitignore() -> Gitignore {
@@ -18,7 +18,7 @@ fn test_path_should_be_under_root() {
     let gitignore = get_gitignore();
     let path = "/tmp/some_file";
     gitignore.matched_path_or_any_parents(Path::new(path), false);
-    assert!(false);
+    unreachable!("matched_path_or_any_parents did not panic");
 }
 
 #[test]

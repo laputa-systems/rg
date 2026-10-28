@@ -13,12 +13,13 @@ pub(crate) const DEFAULT_BUFFER_CAPACITY: usize = 64 * (1 << 10); // 64 KB
 /// enabled) that do not fit in the buffer.
 ///
 /// The default is to eagerly allocate without a limit.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 pub(crate) enum BufferAllocation {
     /// Attempt to expand the size of the buffer until either at least the next
     /// line fits into memory or until all available memory is exhausted.
     ///
     /// This is the default.
+    #[default]
     Eager,
     /// Limit the amount of additional memory allocated to the given size. If
     /// a line is found that requires more memory than is allowed here, then
@@ -26,17 +27,11 @@ pub(crate) enum BufferAllocation {
     Error(usize),
 }
 
-impl Default for BufferAllocation {
-    fn default() -> BufferAllocation {
-        BufferAllocation::Eager
-    }
-}
-
 /// Create a new error to be used when a configured allocation limit has been
 /// reached.
 pub(crate) fn alloc_error(limit: usize) -> io::Error {
     let msg = format!("configured allocation limit ({}) exceeded", limit);
-    io::Error::new(io::ErrorKind::Other, msg)
+    io::Error::other(msg)
 }
 
 /// The behavior of binary detection in the line buffer.
@@ -47,10 +42,11 @@ pub(crate) fn alloc_error(limit: usize) -> io::Error {
 /// is that binary data often indicates data that is undesirable to search
 /// using textual patterns. Of course, there are many cases in which this isn't
 /// true, which is why binary detection is disabled by default.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(crate) enum BinaryDetection {
     /// No binary detection is performed. Data reported by the line buffer may
     /// contain arbitrary bytes.
+    #[default]
     None,
     /// The given byte is searched in all contents read by the line buffer. If
     /// it occurs, then the data is considered binary and the line buffer acts
@@ -63,20 +59,11 @@ pub(crate) enum BinaryDetection {
     Convert(u8),
 }
 
-impl Default for BinaryDetection {
-    fn default() -> BinaryDetection {
-        BinaryDetection::None
-    }
-}
-
 impl BinaryDetection {
     /// Returns true if and only if the detection heuristic demands that
     /// the line buffer stop read data once binary data is observed.
     fn is_quit(&self) -> bool {
-        match *self {
-            BinaryDetection::Quit(_) => true,
-            _ => false,
-        }
+        matches!(*self, BinaryDetection::Quit(_))
     }
 }
 
@@ -543,7 +530,7 @@ fn replace_bytes(
         // Since binary data tends to have long runs of NUL terminators,
         // it is faster to compare one-byte-at-a-time than to stop and start
         // memchr (through `find_byte`) for every byte in a sequence.
-        while bytes.get(0) == Some(&src) {
+        while bytes.first() == Some(&src) {
             bytes[0] = replacement;
             bytes = &mut bytes[1..];
         }
@@ -557,7 +544,7 @@ mod tests {
 
     use super::*;
 
-    const SHERLOCK: &'static str = "\
+    const SHERLOCK: &str = "\
 For the Doctor Watsons of this world, as opposed to the Sherlock
 Holmeses, success in the province of detective work must always
 be, to a very large extent, the result of luck. Sherlock Holmes

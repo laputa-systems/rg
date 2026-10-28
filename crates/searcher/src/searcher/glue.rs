@@ -66,12 +66,11 @@ where
             Err(err) => return Err(S::Error::error_io(err)),
             Ok(didread) => didread,
         };
-        if !already_binary {
-            if let Some(offset) = self.rdr.binary_byte_offset() {
-                if !self.core.binary_data(offset)? {
-                    return Ok(false);
-                }
-            }
+        if !already_binary
+            && let Some(offset) = self.rdr.binary_byte_offset()
+            && !self.core.binary_data(offset)?
+        {
+            return Ok(false);
         }
         if !didread || self.should_binary_quit() {
             return Ok(false);
@@ -359,7 +358,7 @@ mod tests {
 
     use super::*;
 
-    const SHERLOCK: &'static str = "\
+    const SHERLOCK: &str = "\
 For the Doctor Watsons of this world, as opposed to the Sherlock
 Holmeses, success in the province of detective work must always
 be, to a very large extent, the result of luck. Sherlock Holmes
@@ -368,7 +367,7 @@ but Doctor Watson has to have it taken out for him and dusted,
 and exhibited clearly, with a label attached.\
 ";
 
-    const CODE: &'static str = "\
+    const CODE: &str = "\
 extern crate snap;
 
 use std::io;
@@ -1496,7 +1495,7 @@ byte count:307
         use crate::sinks;
         use crate::testutil::RegexMatcher;
 
-        const SHERLOCK: &'static [u8] = b"\
+        const SHERLOCK: &[u8] = b"\
 For the Doctor Wat\xFFsons of this world, as opposed to the Sherlock
 Holmeses, success in the province of detective work must always
 be, to a very large extent, the result of luck. Sherlock Holmes

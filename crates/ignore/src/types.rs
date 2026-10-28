@@ -232,7 +232,7 @@ impl Types {
             glob_to_selection: vec![],
             set: GlobSetBuilder::new().build().unwrap(),
             matches: Arc::new(Pool::with_available_parallelism_capacity(
-                || vec![],
+                Vec::new,
             )),
         }
     }
@@ -282,7 +282,7 @@ impl Types {
             }
         };
         let mut matches = self.matches.get();
-        self.set.matches_into(name, &mut *matches);
+        self.set.matches_into(name, &mut matches);
         // The highest precedent match is the last one.
         if let Some(&i) = matches.last() {
             let (isel, _) = self.glob_to_selection[i];
@@ -304,6 +304,7 @@ impl Types {
 
 /// TypesBuilder builds a type matcher from a set of file type definitions and
 /// a set of file type selections.
+#[derive(Default)]
 pub struct TypesBuilder {
     types: HashMap<String, FileTypeDef>,
     selections: Vec<Selection<()>>,
@@ -360,7 +361,7 @@ impl TypesBuilder {
             glob_to_selection,
             set,
             matches: Arc::new(Pool::with_available_parallelism_capacity(
-                || vec![],
+                Vec::new,
             )),
         })
     }
@@ -437,12 +438,12 @@ impl TypesBuilder {
     /// Add a new file type definition specified in string form. There are two
     /// valid formats:
     /// 1. `{name}:{glob}`.  This defines a 'root' definition that associates the
-    ///     given name with the given glob.
+    ///    given name with the given glob.
     /// 2. `{name}:include:{comma-separated list of already defined names}.
-    ///     This defines an 'include' definition that associates the given name
-    ///     with the definitions of the given existing types.
-    /// Names may not include any characters that are not
-    /// Unicode letters or numbers.
+    ///    This defines an 'include' definition that associates the given name
+    ///    with the definitions of the given existing types.
+    ///    Names may not include any characters that are not
+    ///    Unicode letters or numbers.
     pub fn add_def(&mut self, def: &str) -> Result<(), Error> {
         let parts: Vec<&str> = def.split(':').collect();
         match parts.len() {
@@ -484,7 +485,7 @@ impl TypesBuilder {
 
     /// Add a set of default file type definitions.
     pub fn add_defaults(&mut self) -> &mut TypesBuilder {
-        static MSG: &'static str = "adding a default type should never fail";
+        static MSG: &str = "adding a default type should never fail";
         for &(names, exts) in DEFAULT_TYPES {
             for name in names {
                 for ext in exts {
@@ -543,26 +544,26 @@ mod tests {
         ]
     }
 
-    matched!(match1, types(), vec!["rust"], vec![], "lib.rs");
-    matched!(match2, types(), vec!["html"], vec![], "index.html");
-    matched!(match3, types(), vec!["html"], vec![], "index.htm");
-    matched!(match4, types(), vec!["html", "rust"], vec![], "main.rs");
-    matched!(match5, types(), vec![], vec![], "index.html");
-    matched!(match6, types(), vec![], vec!["rust"], "index.html");
-    matched!(match7, types(), vec!["foo"], vec!["rust"], "main.foo");
-    matched!(match8, types(), vec!["combo"], vec![], "index.html");
-    matched!(match9, types(), vec!["combo"], vec![], "lib.rs");
-    matched!(match10, types(), vec!["py"], vec![], "main.py");
-    matched!(match11, types(), vec!["python"], vec![], "main.py");
+    matched!(match1, types(), ["rust"], [], "lib.rs");
+    matched!(match2, types(), ["html"], [], "index.html");
+    matched!(match3, types(), ["html"], [], "index.htm");
+    matched!(match4, types(), ["html", "rust"], [], "main.rs");
+    matched!(match5, types(), [], [], "index.html");
+    matched!(match6, types(), [], ["rust"], "index.html");
+    matched!(match7, types(), ["foo"], ["rust"], "main.foo");
+    matched!(match8, types(), ["combo"], [], "index.html");
+    matched!(match9, types(), ["combo"], [], "lib.rs");
+    matched!(match10, types(), ["py"], [], "main.py");
+    matched!(match11, types(), ["python"], [], "main.py");
 
-    matched!(not, matchnot1, types(), vec!["rust"], vec![], "index.html");
-    matched!(not, matchnot2, types(), vec![], vec!["rust"], "main.rs");
-    matched!(not, matchnot3, types(), vec!["foo"], vec!["rust"], "main.rs");
-    matched!(not, matchnot4, types(), vec!["rust"], vec!["foo"], "main.rs");
-    matched!(not, matchnot5, types(), vec!["rust"], vec!["foo"], "main.foo");
-    matched!(not, matchnot6, types(), vec!["combo"], vec![], "leftpad.js");
-    matched!(not, matchnot7, types(), vec!["py"], vec![], "index.html");
-    matched!(not, matchnot8, types(), vec!["python"], vec![], "doc.md");
+    matched!(not, matchnot1, types(), ["rust"], [], "index.html");
+    matched!(not, matchnot2, types(), [], ["rust"], "main.rs");
+    matched!(not, matchnot3, types(), ["foo"], ["rust"], "main.rs");
+    matched!(not, matchnot4, types(), ["rust"], ["foo"], "main.rs");
+    matched!(not, matchnot5, types(), ["rust"], ["foo"], "main.foo");
+    matched!(not, matchnot6, types(), ["combo"], [], "leftpad.js");
+    matched!(not, matchnot7, types(), ["py"], [], "index.html");
+    matched!(not, matchnot8, types(), ["python"], [], "doc.md");
 
     #[test]
     fn test_invalid_defs() {

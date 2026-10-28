@@ -57,13 +57,13 @@ impl DecompressionMatcherBuilder {
         let mut commands = vec![];
         for decomp_cmd in defaults.iter().chain(&self.commands) {
             let glob = Glob::new(&decomp_cmd.glob).map_err(|err| {
-                CommandError::io(io::Error::new(io::ErrorKind::Other, err))
+                CommandError::io(io::Error::other(err))
             })?;
             glob_builder.add(glob);
             commands.push(decomp_cmd.clone());
         }
         let globs = glob_builder.build().map_err(|err| {
-            CommandError::io(io::Error::new(io::ErrorKind::Other, err))
+            CommandError::io(io::Error::other(err))
         })?;
         Ok(DecompressionMatcher { globs, commands })
     }

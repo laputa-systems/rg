@@ -155,6 +155,6 @@ impl Haystack {
 
     /// Returns true if and only if this haystack points to a file.
     fn is_file(&self) -> bool {
-        self.dent.file_type().map_or(false, |ft| ft.is_file())
+        self.dent.file_type().is_some_and(|ft| ft.is_file())
     }
 }

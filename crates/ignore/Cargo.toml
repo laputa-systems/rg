@@ -8,7 +8,6 @@ against file paths.
 """
 documentation = "https://docs.rs/ignore"
 repository = "https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore"
-readme = "README.md"
 keywords = ["glob", "ignore", "gitignore", "pattern", "file"]
 license = "Unlicense OR MIT"
 edition.workspace = true

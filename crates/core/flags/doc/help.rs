@@ -10,8 +10,8 @@ use std::{collections::BTreeMap, fmt::Write};
 
 use crate::flags::{Category, Flag, defs::FLAGS, doc::version};
 
-const TEMPLATE_SHORT: &'static str = include_str!("template.short.help");
-const TEMPLATE_LONG: &'static str = include_str!("template.long.help");
+const TEMPLATE_SHORT: &str = include_str!("template.short.help");
+const TEMPLATE_LONG: &str = include_str!("template.long.help");
 
 /// Wraps `std::write!` and asserts there is no failure.
 ///
@@ -111,15 +111,15 @@ fn format_short_columns(
 pub(crate) fn generate_long() -> String {
     let mut cats = BTreeMap::new();
     for flag in FLAGS.iter().copied() {
-        let mut cat = cats.entry(flag.doc_category()).or_insert(String::new());
+        let cat = cats.entry(flag.doc_category()).or_insert(String::new());
         if !cat.is_empty() {
             write!(cat, "\n\n");
         }
-        generate_long_flag(flag, &mut cat);
+        generate_long_flag(flag, cat);
     }
 
     let mut out =
-        TEMPLATE_LONG.replace("!!VERSION!!", &version::generate_digits());
+        TEMPLATE_LONG.replace("!!VERSION!!", version::generate_digits().as_str());
     for (cat, value) in cats.iter() {
         let var = format!("!!{name}!!", name = cat.as_str());
         out = out.replace(&var, value);
@@ -226,14 +226,14 @@ fn remove_roff(v: &str) -> String {
                     .replace(r"\(bu", r"•")
                     .replace(r"\fB", "")
                     .replace(r"\fP", ":");
-                lines.push(format!("{item_label}"));
+                lines.push(item_label.to_string());
             } else if line.starts_with(".IB ") || line.starts_with(".BI ") {
                 let pieces = line
                     .split_whitespace()
                     .skip(1)
                     .collect::<Vec<_>>()
                     .concat();
-                lines.push(format!("{pieces}"));
+                lines.push(pieces.to_string());
             } else if line.starts_with(".sp")
                 || line.starts_with(".PP")
                 || line.starts_with(".TP")

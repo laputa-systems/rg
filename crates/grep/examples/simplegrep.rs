@@ -30,7 +30,7 @@ fn try_main() -> Result<(), Box<dyn Error>> {
 }
 
 fn search(pattern: &str, paths: &[OsString]) -> Result<(), Box<dyn Error>> {
-    let matcher = RegexMatcher::new_line_matcher(&pattern)?;
+    let matcher = RegexMatcher::new_line_matcher(pattern)?;
     let mut searcher = SearcherBuilder::new()
         .binary_detection(BinaryDetection::quit(b'\x00'))
         .line_number(false)

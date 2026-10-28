@@ -639,16 +639,10 @@ mod tests {
     #[ignore]
     fn candidate_lines() {
         fn is_confirmed(m: LineMatchKind) -> bool {
-            match m {
-                LineMatchKind::Confirmed(_) => true,
-                _ => false,
-            }
+            matches!(m, LineMatchKind::Confirmed(_))
         }
         fn is_candidate(m: LineMatchKind) -> bool {
-            match m {
-                LineMatchKind::Candidate(_) => true,
-                _ => false,
-            }
+            matches!(m, LineMatchKind::Candidate(_))
         }
 
         // With no line terminator set, we can't employ any optimizations,

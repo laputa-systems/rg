@@ -53,7 +53,7 @@ pub(crate) fn strip_prefix<'a, P: AsRef<Path> + ?Sized>(
         if prefix.len() > path.len() || prefix != &path[0..prefix.len()] {
             None
         } else {
-            Some(&Path::new(OsStr::from_bytes(&path[prefix.len()..])))
+            Some(Path::new(OsStr::from_bytes(&path[prefix.len()..])))
         }
     }
 
@@ -86,9 +86,9 @@ pub(crate) fn is_file_name<P: AsRef<Path>>(path: P) -> bool {
 ///
 /// If the path terminates in `.`, `..`, or consists solely of a root of
 /// prefix, this will return `None`.
-pub(crate) fn file_name<'a, P: AsRef<Path> + ?Sized>(
-    path: &'a P,
-) -> Option<&'a OsStr> {
+pub(crate) fn file_name<P: AsRef<Path> + ?Sized>(
+    path: &P,
+) -> Option<&OsStr> {
     #[cfg(unix)]
     fn imp(path: &Path) -> Option<&OsStr> {
         use std::os::unix::ffi::OsStrExt;

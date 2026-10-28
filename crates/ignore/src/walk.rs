@@ -163,20 +163,14 @@ impl DirEntryInner {
     }
 
     fn is_stdin(&self) -> bool {
-        match *self {
-            DirEntryInner::Stdin => true,
-            _ => false,
-        }
+        matches!(*self, DirEntryInner::Stdin)
     }
 
     fn metadata(&self) -> Result<Metadata, Error> {
         use self::DirEntryInner::*;
         match *self {
             Stdin => {
-                let err = Error::Io(io::Error::new(
-                    io::ErrorKind::Other,
-                    "<stdin> has no metadata",
-                ));
+                let err = Error::Io(io::Error::other("<stdin> has no metadata"));
                 Err(err.with_path("<stdin>"))
             }
             Walkdir(ref x) => x.metadata().map_err(|err| {
@@ -407,32 +401,32 @@ impl DirEntryRaw {
 /// the rules assume a default configuration.
 ///
 /// * First, glob overrides are checked. If a path matches a glob override,
-/// then matching stops. The path is then only skipped if the glob that matched
-/// the path is an ignore glob. (An override glob is a whitelist glob unless it
-/// starts with a `!`, in which case it is an ignore glob.)
+///   then matching stops. The path is then only skipped if the glob that matched
+///   the path is an ignore glob. (An override glob is a whitelist glob unless it
+///   starts with a `!`, in which case it is an ignore glob.)
 /// * Second, ignore files are checked. Ignore files currently only come from
-/// git ignore files (`.gitignore`, `.git/info/exclude` and the configured
-/// global gitignore file), plain `.ignore` files, which have the same format
-/// as gitignore files, or explicitly added ignore files. The precedence order
-/// is: `.ignore`, `.gitignore`, `.git/info/exclude`, global gitignore and
-/// finally explicitly added ignore files. Note that precedence between
-/// different types of ignore files is not impacted by the directory hierarchy;
-/// any `.ignore` file overrides all `.gitignore` files. Within each precedence
-/// level, more nested ignore files have a higher precedence than less nested
-/// ignore files.
+///   git ignore files (`.gitignore`, `.git/info/exclude` and the configured
+///   global gitignore file), plain `.ignore` files, which have the same format
+///   as gitignore files, or explicitly added ignore files. The precedence order
+///   is: `.ignore`, `.gitignore`, `.git/info/exclude`, global gitignore and
+///   finally explicitly added ignore files. Note that precedence between
+///   different types of ignore files is not impacted by the directory hierarchy;
+///   any `.ignore` file overrides all `.gitignore` files. Within each precedence
+///   level, more nested ignore files have a higher precedence than less nested
+///   ignore files.
 /// * Third, if the previous step yields an ignore match, then all matching
-/// is stopped and the path is skipped. If it yields a whitelist match, then
-/// matching continues. A whitelist match can be overridden by a later matcher.
+///   is stopped and the path is skipped. If it yields a whitelist match, then
+///   matching continues. A whitelist match can be overridden by a later matcher.
 /// * Fourth, unless the path is a directory, the file type matcher is run on
-/// the path. As above, if it yields an ignore match, then all matching is
-/// stopped and the path is skipped. If it yields a whitelist match, then
-/// matching continues.
+///   the path. As above, if it yields an ignore match, then all matching is
+///   stopped and the path is skipped. If it yields a whitelist match, then
+///   matching continues.
 /// * Fifth, if the path hasn't been whitelisted and it is hidden, then the
-/// path is skipped.
+///   path is skipped.
 /// * Sixth, unless the path is a directory, the size of the file is compared
-/// against the max filesize limit. If it exceeds the limit, it is skipped.
+///   against the max filesize limit. If it exceeds the limit, it is skipped.
 /// * Seventh, if the path has made it this far then it is yielded in the
-/// iterator.
+///   iterator.
 #[derive(Clone)]
 pub struct WalkBuilder {
     paths: Vec<PathBuf>,
@@ -460,10 +454,41 @@ pub struct WalkBuilder {
         OnceLock<Result<PathBuf, Arc<std::io::Error>>>,
 }
 
+type SortByName =
+    Arc<dyn Fn(&OsStr, &OsStr) -> Ordering + Send + Sync + 'static>;
+type SortByPath =
+    Arc<dyn Fn(&Path, &Path) -> Ordering + Send + Sync + 'static>;
+
+/// Create a new builder for a recursive directory iterator from the
+/// sequence of paths.
+///
+/// Note that if the iterator is empty, this is the same as
+/// `WalkBuilder::empty`.
+impl<P: AsRef<Path>> FromIterator<P> for WalkBuilder {
+    fn from_iter<T: IntoIterator<Item = P>>(iter: T) -> WalkBuilder {
+        let mut builder = WalkBuilder::empty();
+        for path in iter {
+            builder.add(path);
+        }
+        builder
+    }
+}
+
+/// Create a new recursive directory iterator from the sequence of paths
+/// given.
+///
+/// Note that if the provided iterator is empty, then `Walk` is guaranteed
+/// to yield zero entries.
+impl<P: AsRef<Path>> FromIterator<P> for Walk {
+    fn from_iter<T: IntoIterator<Item = P>>(iter: T) -> Walk {
+        WalkBuilder::from_iter(iter).build()
+    }
+}
+
 #[derive(Clone)]
 enum Sorter {
-    ByName(Arc<dyn Fn(&OsStr, &OsStr) -> Ordering + Send + Sync + 'static>),
-    ByPath(Arc<dyn Fn(&Path, &Path) -> Ordering + Send + Sync + 'static>),
+    ByName(SortByName),
+    ByPath(SortByPath),
 }
 
 #[derive(Clone)]
@@ -521,21 +546,6 @@ impl WalkBuilder {
             filter: None,
             global_gitignores_relative_to: OnceLock::new(),
         }
-    }
-
-    /// Create a new builder for a recursive directory iterator from the
-    /// sequence of paths.
-    ///
-    /// Note that if the iterator is empty, this is the same as
-    /// `WalkBuilder::empty`.
-    pub fn from_iter<P: AsRef<Path>, I: IntoIterator<Item = P>>(
-        paths: I,
-    ) -> WalkBuilder {
-        let mut builder = WalkBuilder::empty();
-        for path in paths.into_iter() {
-            builder.add(path);
-        }
-        builder
     }
 
     /// Build a new `Walk` iterator.
@@ -1084,17 +1094,6 @@ impl Walk {
         WalkBuilder::new(path).build()
     }
 
-    /// Create a new recursive directory iterator from the sequence of paths
-    /// given.
-    ///
-    /// Note that if the provided iterator is empty, then `Walk` is guaranteed
-    /// to yield zero entries.
-    pub fn from_iter<P: AsRef<Path>, I: IntoIterator<Item = P>>(
-        paths: I,
-    ) -> Walk {
-        WalkBuilder::from_iter(paths).build()
-    }
-
     fn skip_entry(&self, ent: &DirEntry) -> Result<bool, Error> {
         if ent.depth() == 0 {
             return Ok(false);
@@ -1111,22 +1110,24 @@ impl Walk {
         if should_skip_entry(&self.ig, ent) {
             return Ok(true);
         }
-        if let Some(ref stdout) = self.skip {
-            if path_equals(ent, stdout)? {
-                return Ok(true);
-            }
+        if let Some(ref stdout) = self.skip
+            && path_equals(ent, stdout)?
+        {
+            return Ok(true);
         }
-        if self.max_filesize.is_some() && !ent.is_dir() {
+        if let Some(max_filesize) = self.max_filesize
+            && !ent.is_dir()
+        {
             return Ok(skip_filesize(
-                self.max_filesize.unwrap(),
+                max_filesize,
                 ent.path(),
                 &ent.metadata().ok(),
             ));
         }
-        if let Some(Filter(filter)) = &self.filter {
-            if !filter(ent) {
-                return Ok(true);
-            }
+        if let Some(Filter(filter)) = &self.filter
+            && !filter(ent)
+        {
+            return Ok(true);
         }
         Ok(false)
     }
@@ -1304,8 +1305,8 @@ pub trait ParallelVisitorBuilder<'s> {
     fn build(&mut self) -> Box<dyn ParallelVisitor + 's>;
 }
 
-impl<'a, 's, P: ParallelVisitorBuilder<'s>> ParallelVisitorBuilder<'s>
-    for &'a mut P
+impl<'s, P: ParallelVisitorBuilder<'s>> ParallelVisitorBuilder<'s>
+    for &mut P
 {
     fn build(&mut self) -> Box<dyn ParallelVisitor + 's> {
         (**self).build()
@@ -1530,7 +1531,7 @@ impl Work {
 
     /// Returns true if and only if this work item is a symlink.
     fn is_symlink(&self) -> bool {
-        self.dent.file_type().map_or(false, |ft| ft.is_symlink())
+        self.dent.file_type().is_some_and(|ft| ft.is_symlink())
     }
 
     /// Adds ignore rules for parent directories.
@@ -1833,7 +1834,7 @@ impl<'s> Worker<'s> {
                 return self.visitor.visit(Err(err));
             }
         };
-        let is_symlink = dent.file_type().map_or(false, |ft| ft.is_symlink());
+        let is_symlink = dent.file_type().is_some_and(|ft| ft.is_symlink());
         if self.follow_links && is_symlink {
             let path = dent.path().to_path_buf();
             dent = match DirEntryRaw::from_path(depth, path, true) {
@@ -1842,10 +1843,10 @@ impl<'s> Worker<'s> {
                     return self.visitor.visit(Err(err));
                 }
             };
-            if dent.is_dir() {
-                if let Err(err) = check_symlink_loop(ig, dent.path(), depth) {
-                    return self.visitor.visit(Err(err));
-                }
+            if dent.is_dir()
+                && let Err(err) = check_symlink_loop(ig, dent.path(), depth)
+            {
+                return self.visitor.visit(Err(err));
             }
         }
         // N.B. See analogous call in the single-threaded implementation about
@@ -1863,9 +1864,11 @@ impl<'s> Worker<'s> {
             }
         }
         let should_skip_filesize =
-            if self.max_filesize.is_some() && !dent.is_dir() {
+            if let Some(max_filesize) = self.max_filesize
+                && !dent.is_dir()
+            {
                 skip_filesize(
-                    self.max_filesize.unwrap(),
+                    max_filesize,
                     dent.path(),
                     &dent.metadata().ok(),
                 )
@@ -2014,10 +2017,7 @@ fn skip_filesize(
     path: &Path,
     ent: &Option<Metadata>,
 ) -> bool {
-    let filesize = match *ent {
-        Some(ref md) => Some(md.len()),
-        None => None,
-    };
+    let filesize = (*ent).as_ref().map(|md| md.len());
 
     if let Some(fs) = filesize {
         if fs > max_filesize {
@@ -2105,7 +2105,7 @@ fn walkdir_is_dir(dent: &walkdir::DirEntry) -> bool {
     if !dent.file_type().is_symlink() || dent.depth() > 0 {
         return false;
     }
-    dent.path().metadata().ok().map_or(false, |md| md.file_type().is_dir())
+    dent.path().metadata().ok().is_some_and(|md| md.file_type().is_dir())
 }
 
 /// Returns true if and only if the given path is on the same device as the
@@ -2259,7 +2259,7 @@ mod tests {
         wfile(td.path().join("a/bar"), "");
 
         let mut builder = WalkBuilder::new(td.path());
-        builder.add_custom_ignore_filename(&custom_ignore);
+        builder.add_custom_ignore_filename(custom_ignore);
         assert_paths(td.path(), &builder, &["bar", "a", "a/bar"]);
     }
 
@@ -2279,7 +2279,7 @@ mod tests {
         builder.git_ignore(false);
         builder.git_global(false);
         builder.git_exclude(false);
-        builder.add_custom_ignore_filename(&custom_ignore);
+        builder.add_custom_ignore_filename(custom_ignore);
         assert_paths(td.path(), &builder, &["bar", "a", "a/bar"]);
     }
 
@@ -2449,12 +2449,12 @@ mod tests {
         let mut builder = WalkBuilder::new(td.path());
         assert_paths(
             td.path(),
-            &builder.min_depth(Some(0)),
+            builder.min_depth(Some(0)),
             &["a", "a/b", "a/b/c", "foo", "a/foo", "a/b/foo", "a/b/c/foo"],
         );
         assert_paths(
             td.path(),
-            &builder.min_depth(Some(1)),
+            builder.min_depth(Some(1)),
             &["a", "a/b", "a/b/c", "foo", "a/foo", "a/b/foo", "a/b/c/foo"],
         );
         assert_paths(
@@ -2522,7 +2522,7 @@ mod tests {
         assert_paths(td.path(), &builder, &["a", "a/b", "a/b/foo", "z"]);
         assert_paths(
             td.path(),
-            &builder.follow_links(true),
+            builder.follow_links(true),
             &["a", "a/b", "a/b/foo", "z", "z/foo"],
         );
     }
@@ -2535,7 +2535,6 @@ mod tests {
 
         let dents = WalkBuilder::new(td.path().join("foo"))
             .build()
-            .into_iter()
             .collect::<Result<Vec<_>, _>>()
             .unwrap();
         assert_eq!(1, dents.len());
@@ -2557,7 +2556,7 @@ mod tests {
 
         let mut builder = WalkBuilder::new(td.path());
         assert_paths(td.path(), &builder, &["a", "a/b", "a/b/c"]);
-        assert_paths(td.path(), &builder.follow_links(true), &["a", "a/b"]);
+        assert_paths(td.path(), builder.follow_links(true), &["a", "a/b"]);
     }
 
     // It's a little tricky to test the 'same_file_system' option since
@@ -2629,7 +2628,7 @@ mod tests {
 
         assert_paths(
             td.path(),
-            &WalkBuilder::new(td.path())
+            WalkBuilder::new(td.path())
                 .filter_entry(|entry| entry.file_name() != OsStr::new("a")),
             &["x", "x/y", "x/y/foo"],
         );

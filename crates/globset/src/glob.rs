@@ -354,7 +354,7 @@ impl Glob {
         if self.opts.case_insensitive {
             return None;
         }
-        let start = match *self.tokens.get(0)? {
+        let start = match *self.tokens.first()? {
             Token::RecursivePrefix => 1,
             _ => 0,
         };
@@ -464,7 +464,7 @@ impl Glob {
             return None;
         }
         let mut lit = String::new();
-        let (start, entire) = match *self.tokens.get(0)? {
+        let (start, entire) = match *self.tokens.first()? {
             Token::RecursivePrefix => {
                 // We only care if this follows a path component if the next
                 // token is a literal.
@@ -511,7 +511,7 @@ impl Glob {
         if self.opts.case_insensitive {
             return None;
         }
-        let start = match *self.tokens.get(0)? {
+        let start = match *self.tokens.first()? {
             Token::RecursivePrefix => 1,
             _ => {
                 // With nothing to gobble up the parent portion of a path,
@@ -578,7 +578,7 @@ impl<'a> GlobBuilder<'a> {
     /// Parses and builds the pattern.
     pub fn build(&self) -> Result<Glob, Error> {
         let mut p = Parser {
-            glob: &self.glob,
+            glob: self.glob,
             alternates_stack: Vec::new(),
             branches: vec![Tokens::default()],
             chars: self.glob.chars().peekable(),
@@ -684,7 +684,7 @@ impl Tokens {
             re.push('$');
             return re;
         }
-        self.tokens_to_regex(options, &self, &mut re);
+        self.tokens_to_regex(options, self, &mut re);
         re.push('$');
         re
     }
@@ -704,7 +704,7 @@ impl Tokens {
                     if options.literal_separator {
                         re.push_str("[^/]");
                     } else {
-                        re.push_str(".");
+                        re.push('.');
                     }
                 }
                 Token::ZeroOrMore => {
@@ -744,7 +744,7 @@ impl Tokens {
                     let mut parts = vec![];
                     for pat in patterns {
                         let mut altre = String::new();
-                        self.tokens_to_regex(options, &pat, &mut altre);
+                        self.tokens_to_regex(options, pat, &mut altre);
                         if !altre.is_empty() || options.empty_alternates {
                             parts.push(altre);
                         }
@@ -854,7 +854,8 @@ impl<'a> Parser<'a> {
 
     fn push_token(&mut self, tok: Token) -> Result<(), Error> {
         if let Some(ref mut pat) = self.branches.last_mut() {
-            return Ok(pat.push(tok));
+            pat.push(tok);
+            return Ok(());
         }
         Err(self.error(ErrorKind::UnopenedAlternates))
     }
@@ -869,7 +870,7 @@ impl<'a> Parser<'a> {
     fn have_tokens(&self) -> Result<bool, Error> {
         match self.branches.last() {
             None => Err(self.error(ErrorKind::UnopenedAlternates)),
-            Some(ref pat) => Ok(!pat.is_empty()),
+            Some(pat) => Ok(!pat.is_empty()),
         }
     }
 
@@ -880,7 +881,8 @@ impl<'a> Parser<'a> {
         if self.alternates_stack.is_empty() {
             self.push_token(Token::Literal(','))
         } else {
-            Ok(self.branches.push(Tokens::default()))
+            self.branches.push(Tokens::default());
+            Ok(())
         }
     }
 
@@ -906,24 +908,23 @@ impl<'a> Parser<'a> {
         }
         assert!(self.bump() == Some('*'));
         if !self.have_tokens()? {
-            if !self.peek().map_or(true, is_separator) {
+            if !self.peek().is_none_or(is_separator) {
                 self.push_token(Token::ZeroOrMore)?;
                 self.push_token(Token::ZeroOrMore)?;
             } else {
                 self.push_token(Token::RecursivePrefix)?;
-                assert!(self.bump().map_or(true, is_separator));
+                assert!(self.bump().is_none_or(is_separator));
             }
             return Ok(());
         }
 
-        if !prev.map(is_separator).unwrap_or(false) {
-            if self.branches.len() <= 1
-                || (prev != Some(',') && prev != Some('{'))
-            {
-                self.push_token(Token::ZeroOrMore)?;
-                self.push_token(Token::ZeroOrMore)?;
-                return Ok(());
-            }
+        if !prev.map(is_separator).unwrap_or(false)
+            && (self.branches.len() <= 1
+                || (prev != Some(',') && prev != Some('{')))
+        {
+            self.push_token(Token::ZeroOrMore)?;
+            self.push_token(Token::ZeroOrMore)?;
+            return Ok(());
         }
         let is_suffix = match self.peek() {
             None => {
@@ -993,7 +994,7 @@ impl<'a> Parser<'a> {
         let mut in_range = false;
         loop {
             let Some(c) = self.bump() else {
-                return if self.opts.allow_unclosed_class == true {
+                return if self.opts.allow_unclosed_class {
                     self.chars = saved_chars;
                     self.cur = saved_cur;
                     self.prev = saved_prev;
@@ -1019,7 +1020,7 @@ impl<'a> Parser<'a> {
                         // invariant: in_range is only set when there is
                         // already at least one character seen.
                         let r = ranges.last_mut().unwrap();
-                        add_to_last_range(&self.glob, r, '-')?;
+                        add_to_last_range(self.glob, r, '-')?;
                         in_range = false;
                     } else {
                         assert!(!ranges.is_empty());
@@ -1031,7 +1032,7 @@ impl<'a> Parser<'a> {
                         // invariant: in_range is only set when there is
                         // already at least one character seen.
                         add_to_last_range(
-                            &self.glob,
+                            self.glob,
                             ranges.last_mut().unwrap(),
                             c,
                         )?;

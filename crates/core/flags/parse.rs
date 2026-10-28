@@ -104,7 +104,7 @@ fn parse_low() -> ParseResult<LowArgs> {
 
     // Now do the CLI parsing dance again.
     let mut low = LowArgs::default();
-    if let Err(err) = parser.parse(final_args.into_iter(), &mut low) {
+    if let Err(err) = parser.parse(final_args, &mut low) {
         return ParseResult::Err(err);
     }
     // Reset the message and logging levels, since they could have changed.
@@ -230,26 +230,26 @@ impl Parser {
                     args.positional.push(value);
                     continue;
                 }
-                lexopt::Arg::Short(ch) if ch == 'h' => {
+                lexopt::Arg::Short('h') => {
                     // Special case -h/--help since behavior is different
                     // based on whether short or long flag is given.
                     args.special = Some(SpecialMode::HelpShort);
                     continue;
                 }
-                lexopt::Arg::Short(ch) if ch == 'V' => {
+                lexopt::Arg::Short('V') => {
                     // Special case -V/--version since behavior is different
                     // based on whether short or long flag is given.
                     args.special = Some(SpecialMode::VersionShort);
                     continue;
                 }
                 lexopt::Arg::Short(ch) => self.find_short(ch),
-                lexopt::Arg::Long(name) if name == "help" => {
+                lexopt::Arg::Long("help") => {
                     // Special case -h/--help since behavior is different
                     // based on whether short or long flag is given.
                     args.special = Some(SpecialMode::HelpLong);
                     continue;
                 }
-                lexopt::Arg::Long(name) if name == "version" => {
+                lexopt::Arg::Long("version") => {
                     // Special case -V/--version since behavior is different
                     // based on whether short or long flag is given.
                     args.special = Some(SpecialMode::VersionLong);

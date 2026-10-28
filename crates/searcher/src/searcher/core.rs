@@ -108,7 +108,7 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
         &mut self,
         binary_byte_offset: u64,
     ) -> Result<bool, S::Error> {
-        self.sink.binary_data(&self.searcher, binary_byte_offset)
+        self.sink.binary_data(self.searcher, binary_byte_offset)
     }
 
     fn is_match(&self, line: &[u8]) -> Result<bool, S::Error> {
@@ -146,14 +146,14 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
             return Ok(None);
         }
         match self.matcher.shortest_match(slice) {
-            Err(err) => return Err(S::Error::error_message(err)),
-            Ok(None) => return Ok(None),
+            Err(err) => Err(S::Error::error_message(err)),
+            Ok(None) => Ok(None),
             Ok(Some(m)) => Ok(Some(m)),
         }
     }
 
     pub(crate) fn begin(&mut self) -> Result<bool, S::Error> {
-        self.sink.begin(&self.searcher)
+        self.sink.begin(self.searcher)
     }
 
     pub(crate) fn finish(
@@ -162,7 +162,7 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
         binary_byte_offset: Option<u64>,
     ) -> Result<(), S::Error> {
         self.sink.finish(
-            &self.searcher,
+            self.searcher,
             &SinkFinish { byte_count, binary_byte_offset },
         )
     }
@@ -200,9 +200,7 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
                 self.config.line_term.as_byte(),
                 self.config.before_context,
             );
-            let consumed =
-                std::cmp::max(context_start, self.last_line_visited);
-            consumed
+            std::cmp::max(context_start, self.last_line_visited)
         };
         self.count_lines(buf, consumed);
         self.absolute_byte_offset += consumed as u64;
@@ -370,10 +368,10 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
                 if !self.sink_after_context(buf, &line)? {
                     return Ok(false);
                 }
-            } else if self.config.passthru {
-                if !self.sink_other_context(buf, &line)? {
-                    return Ok(false);
-                }
+            } else if self.config.passthru
+                && !self.sink_other_context(buf, &line)?
+            {
+                return Ok(false);
             }
             if self.config.stop_on_nonmatch && !success && self.has_matched {
                 return Ok(false);
@@ -534,7 +532,7 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
         let offset = self.absolute_byte_offset + range.start() as u64;
         let linebuf = &buf[*range];
         let keepgoing = self.sink.matched(
-            &self.searcher,
+            self.searcher,
             &SinkMatch {
                 line_term: self.config.line_term,
                 bytes: linebuf,
@@ -564,7 +562,7 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
         self.count_lines(buf, range.start());
         let offset = self.absolute_byte_offset + range.start() as u64;
         let keepgoing = self.sink.context(
-            &self.searcher,
+            self.searcher,
             &SinkContext {
                 #[cfg(test)]
                 line_term: self.config.line_term,
@@ -595,7 +593,7 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
         self.count_lines(buf, range.start());
         let offset = self.absolute_byte_offset + range.start() as u64;
         let keepgoing = self.sink.context(
-            &self.searcher,
+            self.searcher,
             &SinkContext {
                 #[cfg(test)]
                 line_term: self.config.line_term,
@@ -625,7 +623,7 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
         self.count_lines(buf, range.start());
         let offset = self.absolute_byte_offset + range.start() as u64;
         let keepgoing = self.sink.context(
-            &self.searcher,
+            self.searcher,
             &SinkContext {
                 #[cfg(test)]
                 line_term: self.config.line_term,
@@ -654,7 +652,7 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
         if !any_context || !self.has_sunk || !is_gap {
             Ok(true)
         } else {
-            self.sink.context_break(&self.searcher)
+            self.sink.context_break(self.searcher)
         }
     }
 
@@ -708,6 +706,6 @@ impl<'s, M: Matcher, S: Sink> Core<'s, M, S> {
     }
 
     fn has_exceeded_match_limit(&self) -> bool {
-        self.config.max_matches.map_or(false, |limit| self.count() >= limit)
+        self.config.max_matches.is_some_and(|limit| self.count() >= limit)
     }
 }

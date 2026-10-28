@@ -139,7 +139,7 @@ mod tests {
 
     #[test]
     fn literal() {
-        assert_eq!(sparse(&extract("a")), sparse_except(&[b'a']));
+        assert_eq!(sparse(&extract("a")), sparse_except(b"a"));
         assert_eq!(sparse(&extract("☃")), sparse_except(&[0xE2, 0x98, 0x83]));
         assert_eq!(sparse(&extract(r"\xFF")), sparse_except(&[0xC3, 0xBF]));
         assert_eq!(sparse(&extract(r"(?-u)\xFF")), sparse_except(&[0xFF]));
@@ -149,11 +149,11 @@ mod tests {
     fn anchor() {
         // FIXME: The first four tests below should correspond to a full set
         // of bytes for the non-matching bytes I think.
-        assert_eq!(sparse(&extract(r"^")), sparse_except(&[b'\n']));
-        assert_eq!(sparse(&extract(r"$")), sparse_except(&[b'\n']));
-        assert_eq!(sparse(&extract(r"\A")), sparse_except(&[b'\n']));
-        assert_eq!(sparse(&extract(r"\z")), sparse_except(&[b'\n']));
-        assert_eq!(sparse(&extract(r"(?m)^")), sparse_except(&[b'\n']));
-        assert_eq!(sparse(&extract(r"(?m)$")), sparse_except(&[b'\n']));
+        assert_eq!(sparse(&extract(r"^")), sparse_except(b"\n"));
+        assert_eq!(sparse(&extract(r"$")), sparse_except(b"\n"));
+        assert_eq!(sparse(&extract(r"\A")), sparse_except(b"\n"));
+        assert_eq!(sparse(&extract(r"\z")), sparse_except(b"\n"));
+        assert_eq!(sparse(&extract(r"(?m)^")), sparse_except(b"\n"));
+        assert_eq!(sparse(&extract(r"(?m)$")), sparse_except(b"\n"));
     }
 }

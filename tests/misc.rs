@@ -62,7 +62,7 @@ sherlock:be, to a very large extent, the result of luck. Sherlock Holmes
 
 rgtest!(with_heading, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", SHERLOCK);
-    cmd.args(&[
+    cmd.args([
         // This forces the issue since --with-filename is disabled by default
         // when searching one file.
         "--with-filename",
@@ -158,7 +158,7 @@ rgtest!(word_period, |dir: Dir, mut cmd: TestCommand| {
 
 rgtest!(line, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", SHERLOCK);
-    cmd.args(&[
+    cmd.args([
         "-x",
         "Watson|and exhibited clearly, with a label attached.",
         "sherlock",
@@ -198,7 +198,7 @@ be, to a very large extent, the result of luck. FooBar Holmes
 
 rgtest!(replace_groups, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", SHERLOCK);
-    cmd.args(&["-r", "$2, $1", "([A-Z][a-z]+) ([A-Z][a-z]+)", "sherlock"]);
+    cmd.args(["-r", "$2, $1", "([A-Z][a-z]+) ([A-Z][a-z]+)", "sherlock"]);
 
     let expected = "\
 For the Watsons, Doctor of this world, as opposed to the Sherlock
@@ -210,7 +210,7 @@ but Watson, Doctor has to have it taken out for him and dusted,
 
 rgtest!(replace_named_groups, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", SHERLOCK);
-    cmd.args(&[
+    cmd.args([
         "-r",
         "$last, $first",
         "(?P<first>[A-Z][a-z]+) (?P<last>[A-Z][a-z]+)",
@@ -292,7 +292,7 @@ rgtest!(file_type_add, |dir: Dir, mut cmd: TestCommand| {
     dir.create("file.py", "Sherlock");
     dir.create("file.rs", "Sherlock");
     dir.create("file.wat", "Sherlock");
-    cmd.args(&["--type-add", "wat:*.wat", "-t", "wat", "Sherlock"]);
+    cmd.args(["--type-add", "wat:*.wat", "-t", "wat", "Sherlock"]);
 
     eqnice!("file.wat:Sherlock\n", cmd.stdout());
 });
@@ -302,7 +302,7 @@ rgtest!(file_type_add_compose, |dir: Dir, mut cmd: TestCommand| {
     dir.create("file.py", "Sherlock");
     dir.create("file.rs", "Sherlock");
     dir.create("file.wat", "Sherlock");
-    cmd.args(&[
+    cmd.args([
         "--type-add",
         "wat:*.wat",
         "--type-add",
@@ -358,7 +358,7 @@ rgtest!(glob_case_sensitive, |dir: Dir, mut cmd: TestCommand| {
 rgtest!(glob_always_case_insensitive, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", SHERLOCK);
     dir.create("file.HTML", "Sherlock");
-    cmd.args(&["--glob-case-insensitive", "--glob", "*.html", "Sherlock"]);
+    cmd.args(["--glob-case-insensitive", "--glob", "*.html", "Sherlock"]);
 
     eqnice!("file.HTML:Sherlock\n", cmd.stdout());
 });
@@ -408,7 +408,7 @@ rgtest!(count_matches_via_only, |dir: Dir, mut cmd: TestCommand| {
 
 rgtest!(include_zero, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", SHERLOCK);
-    cmd.args(&["--count", "--include-zero", "nada"]);
+    cmd.args(["--count", "--include-zero", "nada"]);
     cmd.assert_err();
 
     let output = cmd.raw_output();
@@ -420,7 +420,7 @@ rgtest!(include_zero, |dir: Dir, mut cmd: TestCommand| {
 
 rgtest!(include_zero_override, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", SHERLOCK);
-    cmd.args(&["--count", "--include-zero", "--no-include-zero", "nada"]);
+    cmd.args(["--count", "--include-zero", "--no-include-zero", "nada"]);
     cmd.assert_err();
 
     let output = cmd.raw_output();
@@ -755,7 +755,7 @@ rgtest!(ignore_git_multi_root_order, |dir: Dir, mut cmd: TestCommand| {
     dir.create("src/valid", "this\n");
     dir.create("tests/valid", "this\n");
 
-    cmd.args(&["--files-with-matches", "this", "src", "tests"]);
+    cmd.args(["--files-with-matches", "this", "src", "tests"]);
     let got = cmd.stdout();
     assert!(
         !got.contains("invalid"),
@@ -767,7 +767,7 @@ rgtest!(ignore_git_multi_root_order, |dir: Dir, mut cmd: TestCommand| {
 
     // Reverse CLI order should behave the same.
     let mut cmd = dir.command();
-    cmd.args(&["--files-with-matches", "this", "tests", "src"]);
+    cmd.args(["--files-with-matches", "this", "tests", "src"]);
     let got = cmd.stdout();
     assert!(
         !got.contains("invalid"),
@@ -785,7 +785,7 @@ rgtest!(ignore_rgignore_multi_root_order, |dir: Dir, mut cmd: TestCommand| {
     dir.create("alpha/a.txt", "AWS\n");
     dir.create("beta/x.svg", "AWS\n");
 
-    cmd.args(&["--files-with-matches", "AWS", "alpha", "beta"]);
+    cmd.args(["--files-with-matches", "AWS", "alpha", "beta"]);
     let got = cmd.stdout();
     assert!(
         !got.contains("x.svg"),
@@ -795,7 +795,7 @@ rgtest!(ignore_rgignore_multi_root_order, |dir: Dir, mut cmd: TestCommand| {
     assert!(got.contains("alpha/a.txt"), "missing alpha/a.txt in:\n{}", got);
 
     let mut cmd = dir.command();
-    cmd.args(&["--files-with-matches", "AWS", "beta", "alpha"]);
+    cmd.args(["--files-with-matches", "AWS", "beta", "alpha"]);
     let got = cmd.stdout();
     assert!(
         !got.contains("x.svg"),
@@ -927,7 +927,7 @@ rgtest!(preprocessing_glob, |dir: Dir, mut cmd: TestCommand| {
 
     dir.create("sherlock", SHERLOCK);
     dir.create_bytes("sherlock.xz", include_bytes!("./data/sherlock.xz"));
-    cmd.args(&["--pre", "xzcat", "--pre-glob", "*.xz", "Sherlock"]);
+    cmd.args(["--pre", "xzcat", "--pre-glob", "*.xz", "Sherlock"]);
 
     let expected = "\
 sherlock.xz:For the Doctor Watsons of this world, as opposed to the Sherlock

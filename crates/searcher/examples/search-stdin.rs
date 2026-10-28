@@ -18,7 +18,7 @@ fn example() -> Result<(), Box<dyn Error>> {
     let pattern = match env::args().nth(1) {
         Some(pattern) => pattern,
         None => {
-            return Err(From::from(format!("Usage: search-stdin <pattern>")));
+            return Err(From::from("Usage: search-stdin <pattern>".to_string()));
         }
     };
     let matcher = RegexMatcher::new(&pattern)?;

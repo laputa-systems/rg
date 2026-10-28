@@ -53,10 +53,10 @@ fn main() -> ExitCode {
             // the unhandled signal causes the process to unceremoniously
             // terminate.
             for cause in err.chain() {
-                if let Some(ioerr) = cause.downcast_ref::<std::io::Error>() {
-                    if ioerr.kind() == std::io::ErrorKind::BrokenPipe {
-                        return ExitCode::from(0);
-                    }
+                if let Some(ioerr) = cause.downcast_ref::<std::io::Error>()
+                    && ioerr.kind() == std::io::ErrorKind::BrokenPipe
+                {
+                    return ExitCode::from(0);
                 }
             }
             eprintln_locked!("{:#}", err);
@@ -223,7 +223,7 @@ fn search_parallel(args: &HiArgs, mode: SearchMode) -> anyhow::Result<bool> {
         let stats = locked_stats.lock().unwrap();
         let mut wtr = searcher.printer().get_mut();
         let _ = print_stats(mode, &stats, started_at, &mut wtr);
-        let _ = bufwtr.print(&mut wtr);
+        let _ = bufwtr.print(wtr);
     }
     Ok(matched.load(Ordering::SeqCst))
 }
@@ -438,7 +438,7 @@ fn print_stats<W: Write>(
     mut wtr: W,
 ) -> std::io::Result<()> {
     let elapsed = std::time::Instant::now().duration_since(started);
-    if matches!(mode, SearchMode::JSON) {
+    if matches!(mode, SearchMode::Json) {
         // We specifically match the format laid out by the JSON printer in
         // the grep-printer crate. We simply "extend" it with the 'summary'
         // message type.
@@ -456,7 +456,7 @@ fn print_stats<W: Write>(
                 }
             }),
         )?;
-        write!(wtr, "\n")
+        writeln!(wtr)
     } else {
         write!(
             wtr,

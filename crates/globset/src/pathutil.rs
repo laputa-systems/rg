@@ -43,10 +43,7 @@ pub(crate) fn file_name_ext<'a>(
     if name.is_empty() {
         return None;
     }
-    let last_dot_at = match name.rfind_byte(b'.') {
-        None => return None,
-        Some(i) => i,
-    };
+    let last_dot_at = name.rfind_byte(b'.')?;
     Some(match *name {
         Cow::Borrowed(name) => Cow::Borrowed(&name[last_dot_at..]),
         Cow::Owned(ref name) => Cow::Owned(name[last_dot_at..].to_vec()),

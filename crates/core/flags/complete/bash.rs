@@ -4,7 +4,7 @@ Provides completions for ripgrep's CLI for the bash shell.
 
 use crate::flags::defs::FLAGS;
 
-const TEMPLATE_FULL: &'static str = "
+const TEMPLATE_FULL: &str = "
 _rg() {
   local i cur prev opts cmds
   COMPREPLY=()
@@ -42,14 +42,14 @@ _rg() {
 complete -F _rg -o bashdefault -o default rg
 ";
 
-const TEMPLATE_CASE: &'static str = "
+const TEMPLATE_CASE: &str = "
         !FLAG!)
           COMPREPLY=($(compgen -f \"${cur}\"))
           return 0
           ;;
 ";
 
-const TEMPLATE_CASE_CHOICES: &'static str = "
+const TEMPLATE_CASE_CHOICES: &str = "
         !FLAG!)
           COMPREPLY=($(compgen -W \"!CHOICES!\" -- \"${cur}\"))
           return 0

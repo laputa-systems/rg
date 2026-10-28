@@ -124,8 +124,8 @@ impl HiArgs {
 
         // We modify the mode in-place on `low` so that subsequent conversions
         // see the correct mode.
-        match low.mode {
-            Mode::Search(ref mut mode) => match *mode {
+        if let Mode::Search(ref mut mode) = low.mode {
+            match *mode {
                 // treat `-v --count-matches` as `-v --count`
                 SearchMode::CountMatches if low.invert_match => {
                     *mode = SearchMode::Count;
@@ -135,8 +135,7 @@ impl HiArgs {
                     *mode = SearchMode::CountMatches;
                 }
                 _ => {}
-            },
-            _ => {}
+            }
         }
 
         let mut state = State::new()?;
@@ -175,7 +174,7 @@ impl HiArgs {
         log::debug!("using {threads} thread(s)");
         let with_filename = low
             .with_filename
-            .unwrap_or_else(|| low.vimgrep || !paths.is_one_file);
+            .unwrap_or(low.vimgrep || !paths.is_one_file);
 
         let file_separator = match low.mode {
             Mode::Search(SearchMode::Standard) => {
@@ -204,8 +203,8 @@ impl HiArgs {
                 SearchMode::FilesWithMatches
                 | SearchMode::FilesWithoutMatch
                 | SearchMode::Count
-                | SearchMode::CountMatches => return false,
-                SearchMode::JSON => return true,
+                | SearchMode::CountMatches => false,
+                SearchMode::Json => true,
                 SearchMode::Standard => {
                     // A few things can imply counting line numbers. In
                     // particular, we generally want to show line numbers by
@@ -549,7 +548,7 @@ impl HiArgs {
         builder
             .color_specs(self.colors.clone())
             .hyperlink(self.hyperlink_config.clone())
-            .separator(self.path_separator.clone())
+            .separator(self.path_separator)
             .terminator(self.path_terminator.unwrap_or(b'\n'));
         builder
     }
@@ -568,7 +567,7 @@ impl HiArgs {
                 SearchMode::FilesWithMatches
                 | SearchMode::Count
                 | SearchMode::CountMatches
-                | SearchMode::JSON
+                | SearchMode::Json
                 | SearchMode::Standard => SummaryKind::QuietWithMatch,
                 SearchMode::FilesWithoutMatch => {
                     SummaryKind::QuietWithoutMatch
@@ -580,8 +579,8 @@ impl HiArgs {
                 SearchMode::FilesWithoutMatch => SummaryKind::PathWithoutMatch,
                 SearchMode::Count => SummaryKind::Count,
                 SearchMode::CountMatches => SummaryKind::CountMatches,
-                SearchMode::JSON => {
-                    return Printer::JSON(self.printer_json(wtr));
+                SearchMode::Json => {
+                    return Printer::Json(self.printer_json(wtr));
                 }
                 SearchMode::Standard => {
                     return Printer::Standard(self.printer_standard(wtr));
@@ -620,7 +619,7 @@ impl HiArgs {
             .max_columns(self.max_columns)
             .only_matching(self.only_matching)
             .path(self.with_filename)
-            .path_terminator(self.path_terminator.clone())
+            .path_terminator(self.path_terminator)
             .per_match_one_line(true)
             .per_match(self.vimgrep)
             .replacement(self.replace.clone().map(|r| r.into()))
@@ -631,7 +630,7 @@ impl HiArgs {
             .separator_field_match(
                 self.field_match_separator.clone().into_bytes(),
             )
-            .separator_path(self.path_separator.clone())
+            .separator_path(self.path_separator)
             .stats(self.stats.is_some())
             .trim_ascii(self.trim);
         // When doing multi-threaded searching, the buffer writer is
@@ -658,9 +657,9 @@ impl HiArgs {
             .hyperlink(self.hyperlink_config.clone())
             .kind(kind)
             .path(self.with_filename)
-            .path_terminator(self.path_terminator.clone())
+            .path_terminator(self.path_terminator)
             .separator_field(b":".to_vec())
-            .separator_path(self.path_separator.clone())
+            .separator_path(self.path_separator)
             .stats(self.stats.is_some())
             .build(wtr)
     }
@@ -783,7 +782,7 @@ impl HiArgs {
             SortModeKind::Path if !sort.reverse => return Box::new(haystacks),
             SortModeKind::Path => {
                 let mut haystacks = haystacks.collect::<Vec<Haystack>>();
-                haystacks.sort_by(|ref h1, ref h2| {
+                haystacks.sort_by(|h1, h2| {
                     h1.path().cmp(h2.path()).reverse()
                 });
                 return Box::new(haystacks.into_iter());
@@ -1225,7 +1224,7 @@ fn globs(
     // This only enables case insensitivity for subsequent globs.
     builder.case_insensitive(true).unwrap();
     for glob in low.iglobs.iter() {
-        builder.add(&glob)?;
+        builder.add(glob)?;
     }
     Ok(builder.build()?)
 }
@@ -1251,7 +1250,7 @@ fn stats(low: &LowArgs) -> Option<grep::printer::Stats> {
     if !matches!(low.mode, Mode::Search(_)) {
         return None;
     }
-    if low.stats || matches!(low.mode, Mode::Search(SearchMode::JSON)) {
+    if low.stats || matches!(low.mode, Mode::Search(SearchMode::Json)) {
         return Some(grep::printer::Stats::new());
     }
     None
@@ -1300,10 +1299,10 @@ fn current_dir() -> anyhow::Result<PathBuf> {
         Err(err) => err,
         Ok(cwd) => return Ok(cwd),
     };
-    if let Some(cwd) = std::env::var_os("PWD") {
-        if !cwd.is_empty() {
-            return Ok(PathBuf::from(cwd));
-        }
+    if let Some(cwd) = std::env::var_os("PWD")
+        && !cwd.is_empty()
+    {
+        return Ok(PathBuf::from(cwd));
     }
     anyhow::bail!(
         "failed to get current working directory: {err}\n\

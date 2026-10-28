@@ -4,7 +4,7 @@ Provides completions for ripgrep's CLI for PowerShell.
 
 use crate::flags::defs::FLAGS;
 
-const TEMPLATE: &'static str = "
+const TEMPLATE: &str = "
 using namespace System.Management.Automation
 using namespace System.Management.Automation.Language
 
@@ -34,7 +34,7 @@ Register-ArgumentCompleter -Native -CommandName 'rg' -ScriptBlock {
 }
 ";
 
-const TEMPLATE_FLAG: &'static str = "[CompletionResult]::new('!DASH_NAME!', '!NAME!', [CompletionResultType]::ParameterName, '!DOC!')";
+const TEMPLATE_FLAG: &str = "[CompletionResult]::new('!DASH_NAME!', '!NAME!', [CompletionResultType]::ParameterName, '!DOC!')";
 
 /// Generate completions for PowerShell.
 ///
@@ -54,7 +54,7 @@ pub(crate) fn generate() -> String {
         flags.push_str(
             &TEMPLATE_FLAG
                 .replace("!DASH_NAME!", &dash_name)
-                .replace("!NAME!", &name)
+                .replace("!NAME!", name)
                 .replace("!DOC!", &doc),
         );
 
@@ -76,7 +76,7 @@ pub(crate) fn generate() -> String {
             flags.push_str(
                 &TEMPLATE_FLAG
                     .replace("!DASH_NAME!", &dash_name)
-                    .replace("!NAME!", &negated)
+                    .replace("!NAME!", negated)
                     .replace("!DOC!", &doc),
             );
         }

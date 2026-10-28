@@ -17,6 +17,18 @@ pub struct RegexMatcherBuilder {
     whole_line: bool,
 }
 
+impl Default for RegexMatcherBuilder {
+    fn default() -> RegexMatcherBuilder {
+        RegexMatcherBuilder {
+            builder: RegexBuilder::new(),
+            case_smart: false,
+            word: false,
+            fixed_strings: false,
+            whole_line: false,
+        }
+    }
+}
+
 impl RegexMatcherBuilder {
     /// Create a new matcher builder with a default configuration.
     pub fn new() -> RegexMatcherBuilder {
@@ -492,10 +504,7 @@ mod tests {
     #[test]
     fn candidate_lines() {
         fn is_confirmed(m: LineMatchKind) -> bool {
-            match m {
-                LineMatchKind::Confirmed(_) => true,
-                _ => false,
-            }
+            matches!(m, LineMatchKind::Confirmed(_))
         }
 
         let matcher = RegexMatcherBuilder::new().build(r"\wfoo\s").unwrap();

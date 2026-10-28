@@ -48,8 +48,8 @@ impl<M: Matcher> Replacer<M> {
     /// replacement, use the `replacement` method.
     ///
     /// This can fail if the underlying matcher reports an error.
-    pub(crate) fn replace_all<'a>(
-        &'a mut self,
+    pub(crate) fn replace_all(
+        &mut self,
         searcher: &Searcher,
         matcher: &M,
         mut haystack: &[u8],
@@ -58,7 +58,7 @@ impl<M: Matcher> Replacer<M> {
     ) -> io::Result<()> {
         // See the giant comment in 'find_iter_at_in_context' below for why we
         // do this dance.
-        let is_multi_line = searcher.multi_line_with_matcher(&matcher);
+        let is_multi_line = searcher.multi_line_with_matcher(matcher);
         // Get the line_terminator that was removed (if any) so we can add it
         // back.
         let line_terminator = if is_multi_line {
@@ -112,9 +112,9 @@ impl<M: Matcher> Replacer<M> {
     /// all replacement occurrences within the returned replacement buffer.
     ///
     /// If no replacement has occurred then `None` is returned.
-    pub(crate) fn replacement<'a>(
-        &'a self,
-    ) -> Option<(&'a [u8], &'a [Match])> {
+    pub(crate) fn replacement(
+        &self,
+    ) -> Option<(&[u8], &[Match])> {
         match self.space {
             None => None,
             Some(ref space) => {
@@ -453,10 +453,7 @@ pub(crate) fn trim_ascii_prefix(
     range: Match,
 ) -> Match {
     fn is_space(b: u8) -> bool {
-        match b {
-            b'\t' | b'\n' | b'\x0B' | b'\x0C' | b'\r' | b' ' => true,
-            _ => false,
-        }
+        matches!(b, b'\t' | b'\n' | b'\x0B' | b'\x0C' | b'\r' | b' ')
     }
 
     let count = slice[range]

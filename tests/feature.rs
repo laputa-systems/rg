@@ -153,7 +153,7 @@ test
     // pattern to filter out baz/bar, which is a subtle difference between true
     // parent ignore files and manually specified ignore files.
     let mut cmd = dir.command();
-    cmd.args(&["--ignore-file", "../.not-an-ignore", "-l", "test"]);
+    cmd.args(["--ignore-file", "../.not-an-ignore", "-l", "test"]);
     cmd.current_dir("baz");
     let expected = "
 baz/bar/test
@@ -180,7 +180,7 @@ rgtest!(f45_precedence_internal, |dir: Dir, mut cmd: TestCommand| {
     dir.create("imp.log", "test");
     dir.create("wat.log", "test");
 
-    cmd.args(&[
+    cmd.args([
         "--ignore-file",
         ".not-an-ignore1",
         "--ignore-file",
@@ -548,19 +548,19 @@ rgtest!(f740_passthru, |dir: Dir, mut cmd: TestCommand| {
     // With multiple -e patterns
     let mut cmd = dir.command();
     cmd.args(common_args);
-    cmd.args(&["-e", "foo", "-e", "bar", "file"]);
+    cmd.args(["-e", "foo", "-e", "bar", "file"]);
     eqnice!(foo_bar_expected, cmd.stdout());
 
     // With multiple -f patterns
     let mut cmd = dir.command();
     cmd.args(common_args);
-    cmd.args(&["-f", "patterns", "file"]);
+    cmd.args(["-f", "patterns", "file"]);
     eqnice!(foo_bar_expected, cmd.stdout());
 
     // -c should override
     let mut cmd = dir.command();
     cmd.args(common_args);
-    cmd.args(&["-c", "foo", "file"]);
+    cmd.args(["-c", "foo", "file"]);
     eqnice!("2\n", cmd.stdout());
 
     let only_foo_expected = "\
@@ -575,7 +575,7 @@ rgtest!(f740_passthru, |dir: Dir, mut cmd: TestCommand| {
     // -o should work
     let mut cmd = dir.command();
     cmd.args(common_args);
-    cmd.args(&["-o", "foo", "file"]);
+    cmd.args(["-o", "foo", "file"]);
     eqnice!(only_foo_expected, cmd.stdout());
 
     let replace_foo_expected = "\
@@ -590,7 +590,7 @@ rgtest!(f740_passthru, |dir: Dir, mut cmd: TestCommand| {
     // -r should work
     let mut cmd = dir.command();
     cmd.args(common_args);
-    cmd.args(&["-r", "wat", "foo", "file"]);
+    cmd.args(["-r", "wat", "foo", "file"]);
     eqnice!(replace_foo_expected, cmd.stdout());
 });
 
@@ -620,7 +620,7 @@ rgtest!(f948_exit_code_error, |dir: Dir, mut cmd: TestCommand| {
 
 // See: https://github.com/BurntSushi/ripgrep/issues/917
 rgtest!(f917_trim, |dir: Dir, mut cmd: TestCommand| {
-    const SHERLOCK: &'static str = "\
+    const SHERLOCK: &str = "\
 zzz
     For the Doctor Watsons of this world, as opposed to the Sherlock
   Holmeses, success in the province of detective work must always
@@ -630,7 +630,7 @@ but Doctor Watson has to have it taken out for him and dusted,
  and exhibited clearly, with a label attached.
 ";
     dir.create("sherlock", SHERLOCK);
-    cmd.args(&["-n", "-B1", "-A2", "--trim", "Holmeses", "sherlock"]);
+    cmd.args(["-n", "-B1", "-A2", "--trim", "Holmeses", "sherlock"]);
 
     let expected = "\
 2-For the Doctor Watsons of this world, as opposed to the Sherlock
@@ -646,7 +646,7 @@ but Doctor Watson has to have it taken out for him and dusted,
 // This is like f917_trim, except this tests that trimming occurs even when the
 // whitespace is part of a match.
 rgtest!(f917_trim_match, |dir: Dir, mut cmd: TestCommand| {
-    const SHERLOCK: &'static str = "\
+    const SHERLOCK: &str = "\
 zzz
     For the Doctor Watsons of this world, as opposed to the Sherlock
   Holmeses, success in the province of detective work must always
@@ -656,7 +656,7 @@ but Doctor Watson has to have it taken out for him and dusted,
  and exhibited clearly, with a label attached.
 ";
     dir.create("sherlock", SHERLOCK);
-    cmd.args(&["-n", "-B1", "-A2", "--trim", r"\s+Holmeses", "sherlock"]);
+    cmd.args(["-n", "-B1", "-A2", "--trim", r"\s+Holmeses", "sherlock"]);
 
     let expected = "\
 2-For the Doctor Watsons of this world, as opposed to the Sherlock
@@ -670,7 +670,7 @@ but Doctor Watson has to have it taken out for him and dusted,
 rgtest!(f917_trim_multi_standard, |dir: Dir, mut cmd: TestCommand| {
     const HAYSTACK: &str = "     0123456789abcdefghijklmnopqrstuvwxyz";
     dir.create("haystack", HAYSTACK);
-    cmd.args(&["--multiline", "--trim", "-r$0", "--no-filename", r"a\n?bc"]);
+    cmd.args(["--multiline", "--trim", "-r$0", "--no-filename", r"a\n?bc"]);
 
     let expected = "0123456789abcdefghijklmnopqrstuvwxyz\n";
     eqnice!(expected, cmd.stdout());
@@ -679,7 +679,7 @@ rgtest!(f917_trim_multi_standard, |dir: Dir, mut cmd: TestCommand| {
 rgtest!(f917_trim_max_columns_normal, |dir: Dir, mut cmd: TestCommand| {
     const HAYSTACK: &str = "     0123456789abcdefghijklmnopqrstuvwxyz";
     dir.create("haystack", HAYSTACK);
-    cmd.args(&[
+    cmd.args([
         "--trim",
         "--max-columns-preview",
         "-M8",
@@ -694,7 +694,7 @@ rgtest!(f917_trim_max_columns_normal, |dir: Dir, mut cmd: TestCommand| {
 rgtest!(f917_trim_max_columns_matches, |dir: Dir, mut cmd: TestCommand| {
     const HAYSTACK: &str = "     0123456789abcdefghijklmnopqrstuvwxyz";
     dir.create("haystack", HAYSTACK);
-    cmd.args(&[
+    cmd.args([
         "--trim",
         "--max-columns-preview",
         "-M8",
@@ -713,7 +713,7 @@ rgtest!(
     |dir: Dir, mut cmd: TestCommand| {
         const HAYSTACK: &str = "     0123456789abcdefghijklmnopqrstuvwxyz";
         dir.create("haystack", HAYSTACK);
-        cmd.args(&[
+        cmd.args([
             "--multiline",
             "--trim",
             "--max-columns-preview",
@@ -736,7 +736,7 @@ rgtest!(
     |dir: Dir, mut cmd: TestCommand| {
         const HAYSTACK: &str = "     0123456789abcdefghijklmnopqrstuvwxyz";
         dir.create("haystack", HAYSTACK);
-        cmd.args(&[
+        cmd.args([
             "--multiline",
             "--trim",
             "--max-columns-preview",
@@ -756,7 +756,7 @@ rgtest!(
     |dir: Dir, mut cmd: TestCommand| {
         const HAYSTACK: &str = "     0123456789abcdefghijklmnopqrstuvwxyz";
         dir.create("haystack", HAYSTACK);
-        cmd.args(&[
+        cmd.args([
             "--multiline",
             "--trim",
             "--max-columns-preview",
@@ -787,7 +787,7 @@ rgtest!(f993_null_data, |dir: Dir, mut cmd: TestCommand| {
 // N.B. There are many more tests in the grep-printer crate.
 rgtest!(f1078_max_columns_preview1, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", SHERLOCK);
-    cmd.args(&[
+    cmd.args([
         "-M46",
         "--max-columns-preview",
         "exhibited|dusted|has to have it",
@@ -802,7 +802,7 @@ sherlock:and exhibited clearly, with a label attached.
 
 rgtest!(f1078_max_columns_preview2, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", SHERLOCK);
-    cmd.args(&[
+    cmd.args([
         "-M43",
         "--max-columns-preview",
         // Doing a replacement forces ripgrep to show the number of remaining
@@ -882,15 +882,15 @@ rgtest!(f1414_no_require_git, |dir: Dir, mut cmd: TestCommand| {
     dir.create("foo", "");
     dir.create("bar", "");
 
-    let stdout = cmd.args(&["--sort", "path", "--files"]).stdout();
+    let stdout = cmd.args(["--sort", "path", "--files"]).stdout();
     eqnice!("bar\nfoo\n", stdout);
 
     let stdout =
-        cmd.args(&["--sort", "path", "--files", "--no-require-git"]).stdout();
+        cmd.args(["--sort", "path", "--files", "--no-require-git"]).stdout();
     eqnice!("bar\n", stdout);
 
     let stdout = cmd
-        .args(&[
+        .args([
             "--sort",
             "path",
             "--files",
@@ -1097,7 +1097,7 @@ rgtest!(f1842_field_match_separator, |dir: Dir, _: TestCommand| {
 // See: https://github.com/BurntSushi/ripgrep/issues/2288
 rgtest!(f2288_context_partial_override, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "1\n2\n3\n4\n5\n6\n7\n8\n9\n");
-    cmd.args(&["-C1", "-A2", "5", "test"]);
+    cmd.args(["-C1", "-A2", "5", "test"]);
     eqnice!("4\n5\n6\n7\n", cmd.stdout());
 });
 
@@ -1106,20 +1106,20 @@ rgtest!(
     f2288_context_partial_override_rev,
     |dir: Dir, mut cmd: TestCommand| {
         dir.create("test", "1\n2\n3\n4\n5\n6\n7\n8\n9\n");
-        cmd.args(&["-A2", "-C1", "5", "test"]);
+        cmd.args(["-A2", "-C1", "5", "test"]);
         eqnice!("4\n5\n6\n7\n", cmd.stdout());
     }
 );
 
 rgtest!(no_context_sep, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "foo\nctx\nbar\nctx\nfoo\nctx");
-    cmd.args(&["-A1", "--no-context-separator", "foo", "test"]);
+    cmd.args(["-A1", "--no-context-separator", "foo", "test"]);
     eqnice!("foo\nctx\nfoo\nctx\n", cmd.stdout());
 });
 
 rgtest!(no_context_sep_overrides, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "foo\nctx\nbar\nctx\nfoo\nctx");
-    cmd.args(&[
+    cmd.args([
         "-A1",
         "--context-separator",
         "AAA",
@@ -1132,7 +1132,7 @@ rgtest!(no_context_sep_overrides, |dir: Dir, mut cmd: TestCommand| {
 
 rgtest!(no_context_sep_overridden, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "foo\nctx\nbar\nctx\nfoo\nctx");
-    cmd.args(&[
+    cmd.args([
         "-A1",
         "--no-context-separator",
         "--context-separator",
@@ -1145,19 +1145,19 @@ rgtest!(no_context_sep_overridden, |dir: Dir, mut cmd: TestCommand| {
 
 rgtest!(context_sep, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "foo\nctx\nbar\nctx\nfoo\nctx");
-    cmd.args(&["-A1", "--context-separator", "AAA", "foo", "test"]);
+    cmd.args(["-A1", "--context-separator", "AAA", "foo", "test"]);
     eqnice!("foo\nctx\nAAA\nfoo\nctx\n", cmd.stdout());
 });
 
 rgtest!(context_sep_default, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "foo\nctx\nbar\nctx\nfoo\nctx");
-    cmd.args(&["-A1", "foo", "test"]);
+    cmd.args(["-A1", "foo", "test"]);
     eqnice!("foo\nctx\n--\nfoo\nctx\n", cmd.stdout());
 });
 
 rgtest!(context_sep_empty, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "foo\nctx\nbar\nctx\nfoo\nctx");
-    cmd.args(&["-A1", "--context-separator", "", "foo", "test"]);
+    cmd.args(["-A1", "--context-separator", "", "foo", "test"]);
     eqnice!("foo\nctx\n\nfoo\nctx\n", cmd.stdout());
 });
 
@@ -1169,6 +1169,6 @@ rgtest!(no_unicode, |dir: Dir, mut cmd: TestCommand| {
 // See: https://github.com/BurntSushi/ripgrep/issues/1790
 rgtest!(stop_on_nonmatch, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "line1\nline2\nline3\nline4\nline5");
-    cmd.args(&["--stop-on-nonmatch", "[235]"]);
+    cmd.args(["--stop-on-nonmatch", "[235]"]);
     eqnice!("test:line2\ntest:line3\n", cmd.stdout());
 });

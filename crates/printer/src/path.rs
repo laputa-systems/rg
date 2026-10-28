@@ -29,7 +29,7 @@ impl Default for Config {
 }
 
 /// A builder for a printer that emits file paths.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct PathPrinterBuilder {
     config: Config,
 }
@@ -135,9 +135,9 @@ impl PathPrinterBuilder {
 /// * It can normalize path separators.
 /// * It permits configuring the terminator.
 /// * It allows setting the color configuration in a way that is consistent
-/// with the other printers in this crate.
+///   with the other printers in this crate.
 /// * It allows setting the hyperlink format in a way that is consistent
-/// with the other printers in this crate.
+///   with the other printers in this crate.
 #[derive(Debug)]
 pub struct PathPrinter<W> {
     config: Config,
@@ -148,7 +148,7 @@ pub struct PathPrinter<W> {
 impl<W: WriteColor> PathPrinter<W> {
     /// Write the given path to the underlying writer.
     pub fn write(&mut self, path: &Path) -> io::Result<()> {
-        let ppath = PrinterPath::new(path.as_ref())
+        let ppath = PrinterPath::new(path)
             .with_separator(self.config.separator);
         if !self.wtr.supports_color() {
             self.wtr.write_all(ppath.as_bytes())?;

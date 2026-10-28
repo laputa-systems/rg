@@ -64,7 +64,7 @@ fn parse<P: AsRef<Path>>(
     path: P,
 ) -> anyhow::Result<(Vec<OsString>, Vec<anyhow::Error>)> {
     let path = path.as_ref();
-    match std::fs::File::open(&path) {
+    match std::fs::File::open(path) {
         Ok(file) => parse_reader(file),
         Err(err) => anyhow::bail!("{}: {}", path.display(), err),
     }

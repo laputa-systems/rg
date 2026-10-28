@@ -143,7 +143,7 @@ impl SummaryKind {
 /// one line) instead of output for each match.
 ///
 /// Once a `Summary` printer is built, its configuration cannot be changed.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct SummaryBuilder {
     config: Config,
 }
@@ -473,13 +473,13 @@ impl<W> Summary<W> {
 /// This type is generic over a few type parameters:
 ///
 /// * `'p` refers to the lifetime of the file path, if one is provided. When
-/// no file path is given, then this is `'static`.
+///   no file path is given, then this is `'static`.
 /// * `'s` refers to the lifetime of the [`Summary`] printer that this type
-/// borrows.
+///   borrows.
 /// * `M` refers to the type of matcher used by
-/// `grep_searcher::Searcher` that is reporting results to this sink.
+///   `grep_searcher::Searcher` that is reporting results to this sink.
 /// * `W` refers to the underlying writer that this printer is writing its
-/// output to.
+///   output to.
 #[derive(Debug)]
 pub struct SummarySink<'p, 's, M: Matcher, W> {
     matcher: M,
@@ -681,14 +681,14 @@ impl<'p, 's, M: Matcher, W: WriteColor> Sink for SummarySink<'p, 's, M, W> {
         searcher: &Searcher,
         binary_byte_offset: u64,
     ) -> Result<bool, io::Error> {
-        if searcher.binary_detection().quit_byte().is_some() {
-            if let Some(ref path) = self.path {
-                log::debug!(
-                    "ignoring {path}: found binary data at \
-                     offset {binary_byte_offset}",
-                    path = path.as_path().display(),
-                );
-            }
+        if searcher.binary_detection().quit_byte().is_some()
+            && let Some(ref path) = self.path
+        {
+            log::debug!(
+                "ignoring {path}: found binary data at \
+                 offset {binary_byte_offset}",
+                path = path.as_path().display(),
+            );
         }
         Ok(true)
     }
@@ -796,7 +796,7 @@ mod tests {
 
     use super::{Summary, SummaryBuilder, SummaryKind};
 
-    const SHERLOCK: &'static [u8] = b"\
+    const SHERLOCK: &[u8] = b"\
 For the Doctor Watsons of this world, as opposed to the Sherlock
 Holmeses, success in the province of detective work must always
 be, to a very large extent, the result of luck. Sherlock Holmes

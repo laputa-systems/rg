@@ -338,7 +338,7 @@ rgtest!(r391, |dir: Dir, mut cmd: TestCommand| {
     dir.create(".git/packed-refs", "");
     dir.create(".git/description", "");
 
-    cmd.args(&[
+    cmd.args([
         "--no-ignore",
         "--hidden",
         "--follow",
@@ -365,7 +365,7 @@ rgtest!(r405, |dir: Dir, mut cmd: TestCommand| {
 // See: https://github.com/BurntSushi/ripgrep/issues/428
 rgtest!(r428_color_context_path, |dir: Dir, mut cmd: TestCommand| {
     dir.create("sherlock", "foo\nbar");
-    cmd.args(&[
+    cmd.args([
         "-A1",
         "-H",
         "--no-heading",
@@ -417,7 +417,7 @@ rgtest!(r451_only_matching_as_in_issue, |dir: Dir, mut cmd: TestCommand| {
 // See: https://github.com/BurntSushi/ripgrep/issues/451
 rgtest!(r451_only_matching, |dir: Dir, mut cmd: TestCommand| {
     dir.create("digits.txt", "1 2 3\n123\n");
-    cmd.args(&["--only-matching", "--column", r"[0-9]", "digits.txt"]);
+    cmd.args(["--only-matching", "--column", r"[0-9]", "digits.txt"]);
 
     let expected = "\
 1:1:1
@@ -517,7 +517,7 @@ rgtest!(r568_leading_hyphen_option_args, |dir: Dir, mut cmd: TestCommand| {
 // longer emit useless escape sequences.
 rgtest!(r599, |dir: Dir, mut cmd: TestCommand| {
     dir.create("input.txt", "\n\ntest\n");
-    cmd.args(&[
+    cmd.args([
         "--color",
         "ansi",
         "--colors",
@@ -627,16 +627,16 @@ rgtest!(r829_original, |dir: Dir, _cmd: TestCommand| {
 
     {
         let mut cmd = dir.command();
-        cmd.args(&["Sample"]).assert_err();
+        cmd.args(["Sample"]).assert_err();
     }
     {
         let mut cmd = dir.command();
-        cmd.args(&["Sample", "a"]).assert_err();
+        cmd.args(["Sample", "a"]).assert_err();
     }
     {
         let mut cmd = dir.command();
         cmd.current_dir("a");
-        cmd.args(&["Sample"]).assert_err();
+        cmd.args(["Sample"]).assert_err();
     }
 });
 
@@ -934,7 +934,7 @@ rgtest!(r1311_multi_line_term_replace, |dir: Dir, mut cmd: TestCommand| {
     dir.create("input", "hello\nworld\n");
     eqnice!(
         "1:hello?world?\n",
-        cmd.args(&["-U", "-r?", "-n", "\n", "input"]).stdout()
+        cmd.args(["-U", "-r?", "-n", "\n", "input"]).stdout()
     );
 });
 
@@ -1013,7 +1013,7 @@ e
 ",
     );
 
-    eqnice!("d\ne\nd\n", cmd.args(&["-A2", "-m1", "d", "foo"]).stdout());
+    eqnice!("d\ne\nd\n", cmd.args(["-A2", "-m1", "d", "foo"]).stdout());
 });
 
 // See: https://github.com/BurntSushi/ripgrep/issues/1389
@@ -1023,7 +1023,7 @@ rgtest!(r1389_bad_symlinks_no_biscuit, |dir: Dir, mut cmd: TestCommand| {
     dir.link_dir("mydir", "mylink");
 
     let stdout = cmd
-        .args(&["test", "--no-ignore", "--sort", "path", "mylink"])
+        .args(["test", "--no-ignore", "--sort", "path", "mylink"])
         .stdout();
     eqnice!("mylink/file.txt:test\n", stdout);
 });
@@ -1035,11 +1035,11 @@ rgtest!(r1401_look_ahead_only_matching_1, |dir: Dir, mut cmd: TestCommand| {
         return;
     }
     dir.create("ip.txt", "foo 42\nxoyz\ncat\tdog\n");
-    cmd.args(&["-No", r".*o(?!.*\s)", "ip.txt"]);
+    cmd.args(["-No", r".*o(?!.*\s)", "ip.txt"]);
     eqnice!("xo\ncat\tdo\n", cmd.stdout());
 
     let mut cmd = dir.command();
-    cmd.args(&["-No", r".*o(?!.*[ \t])", "ip.txt"]);
+    cmd.args(["-No", r".*o(?!.*[ \t])", "ip.txt"]);
     eqnice!("xo\ncat\tdo\n", cmd.stdout());
 });
 
@@ -1050,7 +1050,7 @@ rgtest!(r1401_look_ahead_only_matching_2, |dir: Dir, mut cmd: TestCommand| {
         return;
     }
     dir.create("ip.txt", "foo 42\nxoyz\ncat\tdog\nfoo");
-    cmd.args(&["-No", r".*o(?!.*\s)", "ip.txt"]);
+    cmd.args(["-No", r".*o(?!.*\s)", "ip.txt"]);
     eqnice!("xo\ncat\tdo\nfoo\n", cmd.stdout());
 });
 
@@ -1062,7 +1062,7 @@ rgtest!(r1412_look_behind_no_replacement, |dir: Dir, mut cmd: TestCommand| {
     }
 
     dir.create("test", "foo\nbar\n");
-    cmd.args(&["-nU", "-rquux", r"(?<=foo\n)bar", "test"]);
+    cmd.args(["-nU", "-rquux", r"(?<=foo\n)bar", "test"]);
     eqnice!("2:quux\n", cmd.stdout());
 });
 
@@ -1137,7 +1137,7 @@ use B;
     );
 
     // Check that normal --count is correct.
-    cmd.args(&[
+    cmd.args([
         "--pcre2",
         "--multiline",
         "--count",
@@ -1148,7 +1148,7 @@ use B;
 
     // Now check --count-matches.
     let mut cmd = dir.command();
-    cmd.args(&[
+    cmd.args([
         "--pcre2",
         "--multiline",
         "--count-matches",
@@ -1170,7 +1170,7 @@ rgtest!(r1638, |dir: Dir, mut cmd: TestCommand| {
 // See: https://github.com/BurntSushi/ripgrep/issues/1739
 rgtest!(r1739_replacement_lineterm_match, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "a\n");
-    cmd.args(&[r"-r${0}f", r".*", "test"]);
+    cmd.args([r"-r${0}f", r".*", "test"]);
     eqnice!("af\n", cmd.stdout());
 });
 
@@ -1201,7 +1201,7 @@ rgtest!(r1765, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "\n");
     // We need to add --color=always here to force the failure, since the bad
     // code path is only triggered when colors are enabled.
-    cmd.args(&[r"x?", "--crlf", "--color", "always"]);
+    cmd.args([r"x?", "--crlf", "--color", "always"]);
 
     assert!(!cmd.stdout().is_empty());
 });
@@ -1215,14 +1215,14 @@ rgtest!(r1838_nul_error_with_binary_detection, |dir: Dir, _: TestCommand| {
     }
     dir.create("test", "foo\n");
 
-    dir.command().args(&[r"foo\x00?"]).assert_err();
-    eqnice!("test:foo\n", dir.command().args(&["-a", r"foo\x00?"]).stdout());
+    dir.command().args([r"foo\x00?"]).assert_err();
+    eqnice!("test:foo\n", dir.command().args(["-a", r"foo\x00?"]).stdout());
 });
 
 // See: https://github.com/BurntSushi/ripgrep/issues/1866
 rgtest!(r1866, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "foobar\nfoobar\nfoo quux");
-    cmd.args(&[
+    cmd.args([
         "--multiline",
         "--vimgrep",
         r"foobar\nfoobar\nfoo|quux",
@@ -1293,13 +1293,13 @@ rgtest!(r1891, |dir: Dir, mut cmd: TestCommand| {
     dir.create("test", "\n##\n");
     // N.B. We use -o here to force the issue to occur, which seems to only
     // happen when each match needs to be detected.
-    eqnice!("1:\n2:\n2:\n2:\n", cmd.args(&["-won", "", "test"]).stdout());
+    eqnice!("1:\n2:\n2:\n2:\n", cmd.args(["-won", "", "test"]).stdout());
 });
 
 // See: https://github.com/BurntSushi/ripgrep/issues/2094
 rgtest!(r2094, |dir: Dir, mut cmd: TestCommand| {
     dir.create("haystack", "a\nb\nc\na\nb\nc");
-    cmd.args(&[
+    cmd.args([
         "--no-line-number",
         "--no-filename",
         "--multiline",
@@ -1345,7 +1345,7 @@ b=one
 });
 ",
     );
-    cmd.args(&[
+    cmd.args([
         "--line-number",
         "--multiline",
         "--only-matching",
@@ -1396,7 +1396,7 @@ pipc () {  # [-h] [-U|-u <pkgspec>[,<pkgspec>...]] [<reqs-in>...] [-- <pip-compi
     }
 }
 ");
-    cmd.args(&[
+    cmd.args([
         "-N",
         "-U",
         "-r", "$usage",
@@ -1412,7 +1412,7 @@ rgtest!(r2236, |dir: Dir, mut cmd: TestCommand| {
     dir.create(".ignore", r"foo\/");
     dir.create_dir("foo");
     dir.create("foo/bar", "test\n");
-    cmd.args(&["test"]).assert_err();
+    cmd.args(["test"]).assert_err();
 });
 
 // See: https://github.com/BurntSushi/ripgrep/issues/2480
@@ -1420,32 +1420,32 @@ rgtest!(r2480, |dir: Dir, mut cmd: TestCommand| {
     dir.create("file", "FooBar\n");
 
     // no regression in empty pattern behavior
-    cmd.args(&["-e", "", "file"]);
+    cmd.args(["-e", "", "file"]);
     eqnice!("FooBar\n", cmd.stdout());
 
     // no regression in single pattern behavior
     let mut cmd = dir.command();
-    cmd.args(&["-e", ")(", "file"]);
+    cmd.args(["-e", ")(", "file"]);
     eqnice!("FooBar\n", cmd.stdout());
 
     // no regression in multiple patterns behavior
     let mut cmd = dir.command();
-    cmd.args(&["--only-matching", "-e", "Foo", "-e", "Bar", "file"]);
+    cmd.args(["--only-matching", "-e", "Foo", "-e", "Bar", "file"]);
     eqnice!("Foo\nBar\n", cmd.stdout());
 
     // no regression in capture groups behavior
     let mut cmd = dir.command();
-    cmd.args(&["-e", "Fo(oB)a(r)", "--replace", "${0}_${1}_${2}${3}", "file"]);
+    cmd.args(["-e", "Fo(oB)a(r)", "--replace", "${0}_${1}_${2}${3}", "file"]);
     eqnice!("FooBar_oB_r\n", cmd.stdout()); // note: ${3} expected to be empty
 
     // flag does not leak into next pattern on match
     let mut cmd = dir.command();
-    cmd.args(&["--only-matching", "-e", "(?i)foo", "-e", "bar", "file"]);
+    cmd.args(["--only-matching", "-e", "(?i)foo", "-e", "bar", "file"]);
     eqnice!("Foo\n", cmd.stdout());
 
     // flag does not leak into next pattern on mismatch
     let mut cmd = dir.command();
-    cmd.args(&["--only-matching", "-e", "(?i)notfoo", "-e", "bar", "file"]);
+    cmd.args(["--only-matching", "-e", "(?i)notfoo", "-e", "bar", "file"]);
     cmd.assert_err();
 });
 
@@ -1453,7 +1453,7 @@ rgtest!(r2480, |dir: Dir, mut cmd: TestCommand| {
 rgtest!(r2574, |dir: Dir, mut cmd: TestCommand| {
     dir.create("haystack", "some.domain.com\nsome.domain.com/x\n");
     let got = cmd
-        .args(&[
+        .args([
             "--no-filename",
             "--no-unicode",
             "-w",
@@ -1467,7 +1467,7 @@ rgtest!(r2574, |dir: Dir, mut cmd: TestCommand| {
 // See: https://github.com/BurntSushi/ripgrep/issues/2658
 rgtest!(r2658_null_data_line_regexp, |dir: Dir, mut cmd: TestCommand| {
     dir.create("haystack", "foo\0bar\0quux\0");
-    let got = cmd.args(&["--null-data", "--line-regexp", r"bar"]).stdout();
+    let got = cmd.args(["--null-data", "--line-regexp", r"bar"]).stdout();
     eqnice!("haystack:bar\0", got);
 });
 
@@ -1485,7 +1485,7 @@ rgtest!(r2770_gitignore_error, |dir: Dir, _cmd: TestCommand| {
 // See: https://github.com/BurntSushi/ripgrep/pull/2944
 rgtest!(r2944_incorrect_bytes_searched, |dir: Dir, mut cmd: TestCommand| {
     dir.create("haystack", "foo1\nfoo2\nfoo3\nfoo4\nfoo5\n");
-    let got = cmd.args(&["--stats", "-m2", "foo", "."]).stdout();
+    let got = cmd.args(["--stats", "-m2", "foo", "."]).stdout();
     assert!(got.contains("10 bytes searched\n"));
 });
 
@@ -1497,11 +1497,11 @@ rgtest!(r2990_trip_over_trailing_dot, |dir: Dir, _cmd: TestCommand| {
     dir.create("asdf/foo", "");
     dir.create("asdf./foo", "");
 
-    let got = dir.command().args(&["--files", "-g", "!asdf/"]).stdout();
+    let got = dir.command().args(["--files", "-g", "!asdf/"]).stdout();
     eqnice!("asdf./foo\n", got);
 
     // This used to ignore the glob given and included `asdf./foo` in output.
-    let got = dir.command().args(&["--files", "-g", "!asdf./"]).stdout();
+    let got = dir.command().args(["--files", "-g", "!asdf./"]).stdout();
     eqnice!("asdf/foo\n", got);
 });
 
@@ -1523,38 +1523,38 @@ rgtest!(r3108_files_without_match_quiet_exit, |dir: Dir, _: TestCommand| {
     dir.create("yes-match", "abc");
     dir.create("non-match", "xyz");
 
-    dir.command().args(&["-q", "abc", "non-match"]).assert_exit_code(1);
-    dir.command().args(&["-q", "abc", "yes-match"]).assert_exit_code(0);
+    dir.command().args(["-q", "abc", "non-match"]).assert_exit_code(1);
+    dir.command().args(["-q", "abc", "yes-match"]).assert_exit_code(0);
     dir.command()
-        .args(&["--files-with-matches", "-q", "abc", "non-match"])
+        .args(["--files-with-matches", "-q", "abc", "non-match"])
         .assert_exit_code(1);
     dir.command()
-        .args(&["--files-with-matches", "-q", "abc", "yes-match"])
+        .args(["--files-with-matches", "-q", "abc", "yes-match"])
         .assert_exit_code(0);
 
     dir.command()
-        .args(&["--files-without-match", "abc", "non-match"])
+        .args(["--files-without-match", "abc", "non-match"])
         .assert_exit_code(0);
     dir.command()
-        .args(&["--files-without-match", "abc", "yes-match"])
+        .args(["--files-without-match", "abc", "yes-match"])
         .assert_exit_code(1);
 
     let got = dir
         .command()
-        .args(&["--files-without-match", "abc", "non-match"])
+        .args(["--files-without-match", "abc", "non-match"])
         .stdout();
     eqnice!("non-match\n", got);
 
     dir.command()
-        .args(&["--files-without-match", "-q", "abc", "non-match"])
+        .args(["--files-without-match", "-q", "abc", "non-match"])
         .assert_exit_code(0);
     dir.command()
-        .args(&["--files-without-match", "-q", "abc", "yes-match"])
+        .args(["--files-without-match", "-q", "abc", "yes-match"])
         .assert_exit_code(1);
 
     let got = dir
         .command()
-        .args(&["--files-without-match", "-q", "abc", "non-match"])
+        .args(["--files-without-match", "-q", "abc", "non-match"])
         .stdout();
     eqnice!("", got);
 });
@@ -1568,7 +1568,7 @@ rgtest!(
         dir.create("[abc", "");
         dir.create("test", "");
 
-        let got = cmd.args(&["--files"]).stdout();
+        let got = cmd.args(["--files"]).stdout();
         eqnice!("test\n", got);
     }
 );
@@ -1580,7 +1580,7 @@ rgtest!(
         dir.create("[abc", "");
         dir.create("test", "");
 
-        cmd.args(&["--files", "-g", "[abc"]).assert_err();
+        cmd.args(["--files", "-g", "[abc"]).assert_err();
     }
 );
 
@@ -1603,7 +1603,7 @@ YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n   \
 
         let got = dir
             .command()
-            .args(&[
+            .args([
                 "--multiline",
                 "--pcre2",
                 r"(?s)Start(?=.*thing2)",
@@ -1614,7 +1614,7 @@ YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n   \
 
         let got = dir
             .command()
-            .args(&[
+            .args([
                 "--multiline",
                 "--pcre2",
                 "--files-with-matches",
@@ -1633,18 +1633,18 @@ rgtest!(r3173_hidden_whitelist_only_dot, |dir: Dir, _: TestCommand| {
     dir.create(".ignore", "!.foo.txt");
 
     let cmd = || dir.command();
-    eqnice!(cmd().args(&["--files"]).stdout(), "subdir/.foo.txt\n");
-    eqnice!(cmd().args(&["--files", "."]).stdout(), "./subdir/.foo.txt\n");
-    eqnice!(cmd().args(&["--files", "./"]).stdout(), "./subdir/.foo.txt\n");
+    eqnice!(cmd().args(["--files"]).stdout(), "subdir/.foo.txt\n");
+    eqnice!(cmd().args(["--files", "."]).stdout(), "./subdir/.foo.txt\n");
+    eqnice!(cmd().args(["--files", "./"]).stdout(), "./subdir/.foo.txt\n");
 
     let cmd = || {
         let mut cmd = dir.command();
         cmd.current_dir("subdir");
         cmd
     };
-    eqnice!(cmd().args(&["--files"]).stdout(), ".foo.txt\n");
-    eqnice!(cmd().args(&["--files", "."]).stdout(), "./.foo.txt\n");
-    eqnice!(cmd().args(&["--files", "./"]).stdout(), "./.foo.txt\n");
+    eqnice!(cmd().args(["--files"]).stdout(), ".foo.txt\n");
+    eqnice!(cmd().args(["--files", "."]).stdout(), "./.foo.txt\n");
+    eqnice!(cmd().args(["--files", "./"]).stdout(), "./.foo.txt\n");
 });
 
 // See: https://github.com/BurntSushi/ripgrep/issues/3179

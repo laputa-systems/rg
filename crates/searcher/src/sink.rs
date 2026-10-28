@@ -41,7 +41,7 @@ pub trait SinkError: Sized {
 /// of the box.
 impl SinkError for io::Error {
     fn error_message<T: std::fmt::Display>(message: T) -> io::Error {
-        io::Error::new(io::ErrorKind::Other, message.to_string())
+        io::Error::other(message.to_string())
     }
 
     fn error_io(err: io::Error) -> io::Error {
@@ -222,7 +222,7 @@ pub trait Sink {
     }
 }
 
-impl<'a, S: Sink> Sink for &'a mut S {
+impl<S: Sink> Sink for &mut S {
     type Error = S::Error;
 
     #[inline]
@@ -563,7 +563,7 @@ pub mod sinks {
                     return Err(io::Error::error_message(msg));
                 }
             };
-            (self.0)(line_number, &matched)
+            (self.0)(line_number, matched)
         }
     }
 

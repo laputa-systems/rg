@@ -26,7 +26,7 @@ impl AstAnalysis {
     /// Perform an AST analysis given the AST.
     pub(crate) fn from_ast(ast: &Ast) -> AstAnalysis {
         let mut analysis = AstAnalysis::new();
-        analysis.from_ast_impl(ast);
+        analysis.analyze_ast(ast);
         analysis
     }
 
@@ -53,7 +53,7 @@ impl AstAnalysis {
         AstAnalysis { any_uppercase: false, any_literal: false }
     }
 
-    fn from_ast_impl(&mut self, ast: &Ast) {
+    fn analyze_ast(&mut self, ast: &Ast) {
         if self.done() {
             return;
         }
@@ -65,46 +65,46 @@ impl AstAnalysis {
             | Ast::ClassUnicode(_)
             | Ast::ClassPerl(_) => {}
             Ast::Literal(ref x) => {
-                self.from_ast_literal(x);
+                self.analyze_literal(x);
             }
             Ast::ClassBracketed(ref x) => {
-                self.from_ast_class_set(&x.kind);
+                self.analyze_class_set(&x.kind);
             }
             Ast::Repetition(ref x) => {
-                self.from_ast_impl(&x.ast);
+                self.analyze_ast(&x.ast);
             }
             Ast::Group(ref x) => {
-                self.from_ast_impl(&x.ast);
+                self.analyze_ast(&x.ast);
             }
             Ast::Alternation(ref alt) => {
                 for x in &alt.asts {
-                    self.from_ast_impl(x);
+                    self.analyze_ast(x);
                 }
             }
             Ast::Concat(ref alt) => {
                 for x in &alt.asts {
-                    self.from_ast_impl(x);
+                    self.analyze_ast(x);
                 }
             }
         }
     }
 
-    fn from_ast_class_set(&mut self, ast: &ast::ClassSet) {
+    fn analyze_class_set(&mut self, ast: &ast::ClassSet) {
         if self.done() {
             return;
         }
         match *ast {
             ast::ClassSet::Item(ref item) => {
-                self.from_ast_class_set_item(item);
+                self.analyze_class_set_item(item);
             }
             ast::ClassSet::BinaryOp(ref x) => {
-                self.from_ast_class_set(&x.lhs);
-                self.from_ast_class_set(&x.rhs);
+                self.analyze_class_set(&x.lhs);
+                self.analyze_class_set(&x.rhs);
             }
         }
     }
 
-    fn from_ast_class_set_item(&mut self, ast: &ast::ClassSetItem) {
+    fn analyze_class_set_item(&mut self, ast: &ast::ClassSetItem) {
         if self.done() {
             return;
         }
@@ -114,24 +114,24 @@ impl AstAnalysis {
             | ast::ClassSetItem::Unicode(_)
             | ast::ClassSetItem::Perl(_) => {}
             ast::ClassSetItem::Literal(ref x) => {
-                self.from_ast_literal(x);
+                self.analyze_literal(x);
             }
             ast::ClassSetItem::Range(ref x) => {
-                self.from_ast_literal(&x.start);
-                self.from_ast_literal(&x.end);
+                self.analyze_literal(&x.start);
+                self.analyze_literal(&x.end);
             }
             ast::ClassSetItem::Bracketed(ref x) => {
-                self.from_ast_class_set(&x.kind);
+                self.analyze_class_set(&x.kind);
             }
             ast::ClassSetItem::Union(ref union) => {
                 for x in &union.items {
-                    self.from_ast_class_set_item(x);
+                    self.analyze_class_set_item(x);
                 }
             }
         }
     }
 
-    fn from_ast_literal(&mut self, ast: &ast::Literal) {
+    fn analyze_literal(&mut self, ast: &ast::Literal) {
         self.any_literal = true;
         self.any_uppercase = self.any_uppercase || ast.c.is_uppercase();
     }

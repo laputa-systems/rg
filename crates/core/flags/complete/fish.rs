@@ -4,8 +4,8 @@ Provides completions for ripgrep's CLI for the fish shell.
 
 use crate::flags::{CompletionType, defs::FLAGS};
 
-const TEMPLATE: &'static str = "complete -c rg !SHORT! -l !LONG! -d '!DOC!'";
-const TEMPLATE_NEGATED: &'static str = "complete -c rg -l !NEGATED! -n '__rg_contains_opt !LONG! !SHORT!' -d '!DOC!'\n";
+const TEMPLATE: &str = "complete -c rg !SHORT! -l !LONG! -d '!DOC!'";
+const TEMPLATE_NEGATED: &str = "complete -c rg -l !NEGATED! -n '__rg_contains_opt !LONG! !SHORT!' -d '!DOC!'\n";
 
 /// Generate completions for Fish.
 ///
@@ -23,7 +23,7 @@ pub(crate) fn generate() -> String {
         let doc = flag.doc_short().replace("'", "\\'");
         let mut completion = TEMPLATE
             .replace("!SHORT!", &short)
-            .replace("!LONG!", &long)
+            .replace("!LONG!", long)
             .replace("!DOC!", &doc);
 
         match flag.completion_type() {
@@ -41,12 +41,12 @@ pub(crate) fn generate() -> String {
             CompletionType::Encoding => {
                 completion.push_str(" -r -f -a '");
                 completion.push_str(super::ENCODINGS);
-                completion.push_str("'");
+                completion.push('\'');
             }
             CompletionType::Other if !flag.doc_choices().is_empty() => {
                 completion.push_str(" -r -f -a '");
                 completion.push_str(&flag.doc_choices().join(" "));
-                completion.push_str("'");
+                completion.push('\'');
             }
             CompletionType::Other if !flag.is_switch() => {
                 completion.push_str(" -r -f");
@@ -64,9 +64,9 @@ pub(crate) fn generate() -> String {
             };
             out.push_str(
                 &TEMPLATE_NEGATED
-                    .replace("!NEGATED!", &negated)
+                    .replace("!NEGATED!", negated)
                     .replace("!SHORT!", &short)
-                    .replace("!LONG!", &long)
+                    .replace("!LONG!", long)
                     .replace("!DOC!", &doc),
             );
         }

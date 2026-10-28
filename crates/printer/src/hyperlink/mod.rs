@@ -492,11 +492,11 @@ impl FormatBuilder {
         if scheme.is_empty() {
             return Err(err_invalid_scheme);
         }
-        let is_valid_scheme_char = |byte| match byte {
-            b'0'..=b'9' | b'A'..=b'Z' | b'a'..=b'z' | b'+' | b'-' | b'.' => {
-                true
-            }
-            _ => false,
+        let is_valid_scheme_char = |byte| {
+            matches!(
+                byte,
+                b'0'..=b'9' | b'A'..=b'Z' | b'a'..=b'z' | b'+' | b'-' | b'.'
+            )
         };
         if !scheme.iter().all(|&b| is_valid_scheme_char(b)) {
             return Err(err_invalid_scheme);
@@ -825,7 +825,7 @@ impl HyperlinkPath {
 /// list to users. This will cause special aliases like `none` and `default` to
 /// appear first.
 pub fn hyperlink_aliases() -> Vec<HyperlinkAlias> {
-    HYPERLINK_PATTERN_ALIASES.iter().cloned().collect()
+    HYPERLINK_PATTERN_ALIASES.to_vec()
 }
 
 #[cfg(test)]
