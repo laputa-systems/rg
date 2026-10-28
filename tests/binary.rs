@@ -36,7 +36,7 @@ const HAY: &[u8] = include_bytes!("./data/sherlock-nul.txt");
 #[cfg(not(target_os = "macos"))]
 rgtest!(mmap_match_implicit, |dir: Dir, mut cmd: TestCommand| {
     dir.create_bytes("hay", HAY);
-    cmd.args(&["--mmap", "-n", "Project Gutenberg EBook", "-g", "hay"]);
+    cmd.args(["--mmap", "-n", "Project Gutenberg EBook", "-g", "hay"]);
 
     // With mmap, we get a match and a warning about binary content
     let expected = "\
@@ -49,7 +49,7 @@ hay:1:The Project Gutenberg EBook of A Study In Scarlet, by Arthur Conan Doyle
 #[cfg(not(target_os = "macos"))]
 rgtest!(mmap_match_explicit, |dir: Dir, mut cmd: TestCommand| {
     dir.create_bytes("hay", HAY);
-    cmd.args(&["--mmap", "-n", "Project Gutenberg EBook", "hay"]);
+    cmd.args(["--mmap", "-n", "Project Gutenberg EBook", "hay"]);
 
     let expected = "\
 1:The Project Gutenberg EBook of A Study In Scarlet, by Arthur Conan Doyle
@@ -64,7 +64,7 @@ rgtest!(mmap_match_near_nul, |dir: Dir, mut cmd: TestCommand| {
     dir.create_bytes("hay", HAY);
     // Pattern that matches around line 1898 where the NUL byte is.
     // Note: Using direct file path instead of glob.
-    cmd.args(&["--mmap", "-n", "abcdef", "hay"]);
+    cmd.args(["--mmap", "-n", "abcdef", "hay"]);
 
     let expected = "\
 binary file matches (found \"\\0\" byte around offset 77041)
@@ -76,7 +76,7 @@ binary file matches (found \"\\0\" byte around offset 77041)
 #[cfg(not(target_os = "macos"))]
 rgtest!(mmap_match_count, |dir: Dir, mut cmd: TestCommand| {
     dir.create_bytes("hay", HAY);
-    cmd.args(&["--mmap", "-c", "Project Gutenberg EBook|Heaven", "hay"]);
+    cmd.args(["--mmap", "-c", "Project Gutenberg EBook|Heaven", "hay"]);
 
     // With mmap, since we're counting all matches and might not
     // encounter the NUL byte during initial detection, the count
@@ -90,7 +90,7 @@ rgtest!(mmap_match_count, |dir: Dir, mut cmd: TestCommand| {
 rgtest!(mmap_match_multiple, |dir: Dir, mut cmd: TestCommand| {
     dir.create_bytes("hay", HAY);
     // Use explicit file path.
-    cmd.args(&["--mmap", "-n", "Project Gutenberg EBook|Heaven", "hay"]);
+    cmd.args(["--mmap", "-n", "Project Gutenberg EBook|Heaven", "hay"]);
 
     // With explicit file and memory maps, matches before and after NUL byte
     // are shown.
@@ -107,7 +107,7 @@ rgtest!(mmap_match_multiple, |dir: Dir, mut cmd: TestCommand| {
 rgtest!(mmap_binary_flag, |dir: Dir, mut cmd: TestCommand| {
     dir.create_bytes("hay", HAY);
     // Use glob pattern.
-    cmd.args(&["--mmap", "-n", "--binary", "Heaven", "-g", "hay"]);
+    cmd.args(["--mmap", "-n", "--binary", "Heaven", "-g", "hay"]);
 
     let expected = "\
 hay:1871:\"No. Heaven knows what the objects of his studies are. But here we
@@ -119,7 +119,7 @@ hay:1871:\"No. Heaven knows what the objects of his studies are. But here we
 #[cfg(not(target_os = "macos"))]
 rgtest!(mmap_text_flag, |dir: Dir, mut cmd: TestCommand| {
     dir.create_bytes("hay", HAY);
-    cmd.args(&["--mmap", "-n", "--text", "Heaven", "-g", "hay"]);
+    cmd.args(["--mmap", "-n", "--text", "Heaven", "-g", "hay"]);
 
     // With --text flag, binary detection should be disabled.
     let expected = "\
@@ -133,7 +133,7 @@ hay:1871:\"No. Heaven knows what the objects of his studies are. But here we
 rgtest!(mmap_after_nul_match, |dir: Dir, mut cmd: TestCommand| {
     dir.create_bytes("hay", HAY);
     // Use explicit file path.
-    cmd.args(&["--mmap", "-n", "medical student", "hay"]);
+    cmd.args(["--mmap", "-n", "medical student", "hay"]);
 
     // With explicit file and memory maps, all matches are shown
     let expected = "\
