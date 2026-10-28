@@ -2603,12 +2603,12 @@ mod tests {
             return;
         }
         // We're the root, so the test won't check what we want it to.
-        if fs::read_dir(&dir_path).is_ok() {
+        if fs::read_dir(dir_path).is_ok() {
             return;
         }
 
         // Check that we can't descend but get an entry for the parent dir.
-        let builder = WalkBuilder::new(&dir_path);
+        let builder = WalkBuilder::new(dir_path);
         assert_paths(dir_path.parent().unwrap(), &builder, &["root"]);
     }
 
