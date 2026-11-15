@@ -234,12 +234,12 @@ repo](https://github.com/nalgeon/tryxinyminutes).
 The binary name is `rg`.
 
 This repository publishes [prereleases](https://github.com/laputa-systems/rg/releases).
-Each tag is `release-<sha>` and has three zip archives. Each archive contains
+Each tag is `release-<sha>` and has three tar.xz archives. Each archive contains
 one `rg` binary and no man page or shell completions:
 
-* `rg-aarch64-apple-darwin.zip`
-* `rg-x86_64-unknown-linux-musl.zip` (static)
-* `rg-aarch64-unknown-linux-musl.zip` (static)
+* `rg-aarch64-apple-darwin.tar.xz`
+* `rg-x86_64-unknown-linux-musl.tar.xz` (static)
+* `rg-aarch64-unknown-linux-musl.tar.xz` (static)
 
 Zips published before the next release workflow run were built without the
 `pcre2` feature. On those binaries, `rg -P` prints
