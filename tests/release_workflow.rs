@@ -1,41 +1,52 @@
 #[test]
-fn release_build_passes_pcre2() {
+fn release_builds_pass_pcre2() {
     let workflow = include_str!("../.github/workflows/release.yml");
-    let command = build_release_run(workflow).expect("Build release step");
-    let tokens: Vec<&str> = command.split_whitespace().collect();
-    assert!(
-        tokens.windows(2).any(|pair| pair == ["--features", "pcre2"]),
-        "release build must pass --features pcre2: {command}",
-    );
-    for required in ["--locked", "--release", "--bin", "--target"] {
+    for step in ["Build macOS release", "Build and verify Linux release"] {
+        let command = step_run(workflow, step)
+            .unwrap_or_else(|| panic!("missing step {step}"));
+        let tokens: Vec<&str> = command
+            .split_whitespace()
+            .filter(|token| *token != "\\")
+            .collect();
         assert!(
-            tokens.contains(&required),
-            "release build dropped {required}: {command}",
+            tokens.windows(2).any(|pair| pair == ["--features", "pcre2"]),
+            "{step} must pass --features pcre2: {command}",
+        );
+        for required in ["--locked", "--release", "--bin", "--target"] {
+            assert!(
+                tokens.contains(&required),
+                "{step} dropped {required}: {command}",
+            );
+        }
+        assert!(
+            tokens.windows(2).any(|pair| pair == ["--bin", "rg"]),
+            "{step} must build bin rg: {command}",
         );
     }
-    assert!(
-        tokens.contains(&"rg"),
-        "release build must build bin rg: {command}",
-    );
 }
 
-fn build_release_run(workflow: &str) -> Option<&str> {
-    let mut in_step = false;
-    for line in workflow.lines() {
+fn step_run(workflow: &str, name: &str) -> Option<String> {
+    let header = format!("- name: {name}");
+    let mut lines = workflow.lines().skip_while(|line| line.trim() != header);
+    let indent = lines.next()?.find('-')?;
+    let mut command = String::new();
+    let mut in_run = false;
+    for line in lines {
         let trimmed = line.trim();
-        if trimmed == "- name: Build release" {
-            in_step = true;
-            continue;
-        }
-        if !in_step {
-            continue;
-        }
-        if trimmed.starts_with("- ") {
+        let column = line.len() - line.trim_start().len();
+        if !trimmed.is_empty() && column <= indent {
             break;
         }
-        if let Some(command) = trimmed.strip_prefix("run:") {
-            return Some(command.trim());
+        if in_run {
+            command.push_str(trimmed);
+            command.push('\n');
+        } else if let Some(rest) = trimmed.strip_prefix("run:") {
+            let rest = rest.trim();
+            if rest != "|" {
+                return Some(rest.to_string());
+            }
+            in_run = true;
         }
     }
-    None
+    in_run.then_some(command)
 }
