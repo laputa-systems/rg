@@ -12,6 +12,7 @@ concurrency:
 env:
   CARGO_INCREMENTAL: 0
   CARGO_PROFILE_DEV_DEBUG: 0
+  MUSL_IMAGE: ghcr.io/joshuarli/musl-toolchain@sha256:8a372c6a873b7613987fecc1102f68fb16f4fc4e607432adad924dc1506eae54
 
 jobs:
   build:
@@ -30,29 +31,44 @@ jobs:
         include:
           - runner: macos-26
             target: aarch64-apple-darwin
+            docker_platform: ''
           - runner: ubuntu-latest
             target: x86_64-unknown-linux-musl
+            docker_platform: linux/amd64
           - runner: ubuntu-24.04-arm
             target: aarch64-unknown-linux-musl
+            docker_platform: linux/arm64
 
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        if: matrix.docker_platform == ''
         with:
           toolchain: stable
-      - name: Install Linux musl tools
-        if: contains(matrix.target, 'linux-musl')
-        run: sudo apt-get update && sudo apt-get install --yes musl-tools
       - name: Install Rust target
+        if: matrix.docker_platform == ''
         run: rustup target add "${{ matrix.target }}"
 
-      - name: Build release
-        env:
-          CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: musl-gcc
-          CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS: -C target-feature=+crt-static
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_RUSTFLAGS: -C target-feature=+crt-static
+      - name: Build macOS release
+        if: matrix.docker_platform == ''
         run: cargo build --locked --release --features pcre2 --bin rg --target "${{ matrix.target }}"
+      - name: Build and verify Linux release
+        if: matrix.docker_platform != ''
+        run: |
+          docker run --rm --init \
+            --platform "${{ matrix.docker_platform }}" \
+            --env MUSL_TARGET=${{ matrix.target }} \
+            --env MUSL_BUILD_MODE=release-static \
+            -v "$GITHUB_WORKSPACE:/work" \
+            -w /work \
+            "$MUSL_IMAGE" \
+            sh -ec '
+              musl-cargo build --locked --release --features pcre2 --bin rg \
+                -Z build-std=std \
+                -Z build-std-features= \
+                --target ${{ matrix.target }}
+              verify-static-elf target/${{ matrix.target }}/release/rg
+            '
 
       - name: Package binary
         run: cp "target/${{ matrix.target }}/release/rg" "rg-${{ matrix.target }}"
