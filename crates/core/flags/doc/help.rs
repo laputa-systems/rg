@@ -12,6 +12,7 @@ use crate::flags::{Category, Flag, defs::FLAGS, doc::version};
 
 const TEMPLATE_SHORT: &str = include_str!("template.short.help");
 const TEMPLATE_LONG: &str = include_str!("template.long.help");
+const OWNED_FOOTER: &str = include_str!("owned.footer");
 
 /// Wraps `std::write!` and asserts there is no failure.
 ///
@@ -41,6 +42,8 @@ pub(crate) fn generate_short() -> String {
         let val = format_short_columns(col1, col2, maxcol1, maxcol2);
         out = out.replace(&var, &val);
     }
+    out.push('\n');
+    out.push_str(OWNED_FOOTER);
     out
 }
 
@@ -124,6 +127,8 @@ pub(crate) fn generate_long() -> String {
         let var = format!("!!{name}!!", name = cat.as_str());
         out = out.replace(&var, value);
     }
+    out.push('\n');
+    out.push_str(OWNED_FOOTER);
     out
 }
 
