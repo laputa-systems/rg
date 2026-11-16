@@ -42,7 +42,7 @@ pub(crate) fn generate_short() -> String {
         let val = format_short_columns(col1, col2, maxcol1, maxcol2);
         out = out.replace(&var, &val);
     }
-    out.push_str("\n");
+    out.push('\n');
     out.push_str(OWNED_FOOTER);
     out
 }
@@ -127,7 +127,7 @@ pub(crate) fn generate_long() -> String {
         let var = format!("!!{name}!!", name = cat.as_str());
         out = out.replace(&var, value);
     }
-    out.push_str("\n");
+    out.push('\n');
     out.push_str(OWNED_FOOTER);
     out
 }
