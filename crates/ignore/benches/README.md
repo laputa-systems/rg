@@ -58,8 +58,8 @@ file-selection rules that match most visited files.
 Like the `globset` benchmarks, these use Rust's nightly `test` harness:
 
 ```console
-cargo +nightly bench -p ignore --bench workloads
-cargo +nightly bench -p ignore --bench workloads incremental
+cargo +nightly bench -p laputa-ignore --bench workloads
+cargo +nightly bench -p laputa-ignore --bench workloads incremental
 ```
 
 For comparisons, use the same compiler, profile, fixture parameters, and CPU
@@ -77,12 +77,12 @@ omit cross-crate LTO. Check promising changes in both configurations, especially
 when small matching benchmarks give inconsistent results:
 
 ```console
-CARGO_PROFILE_BENCH_LTO=fat CARGO_PROFILE_BENCH_CODEGEN_UNITS=16 cargo +nightly bench -p ignore --bench workloads
+CARGO_PROFILE_BENCH_LTO=fat CARGO_PROFILE_BENCH_CODEGEN_UNITS=16 cargo +nightly bench -p laputa-ignore --bench workloads
 ```
 
 For focused comparisons, pass one benchmark name with `--exact` so that each
 case runs in a separate process:
 
 ```console
-cargo +nightly bench -p ignore --bench workloads -- --exact incremental_ignored_parent
+cargo +nightly bench -p laputa-ignore --bench workloads -- --exact incremental_ignored_parent
 ```
