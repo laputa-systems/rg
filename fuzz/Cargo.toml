@@ -9,7 +9,7 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-globset = { path = "../crates/globset", features = ["arbitrary"] }
+globset = { package = "laputa-globset", path = "../crates/globset", features = ["arbitrary"] }
 
 # Prevent this from interfering with workspaces
 [workspace]

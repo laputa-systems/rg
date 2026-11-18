@@ -1,5 +1,5 @@
 [package]
-name = "ignore"
+name = "laputa-ignore"
 version = "0.4.33"  #:version
 authors = ["Andrew Gallant <jamslam@gmail.com>"]
 description = """
@@ -19,7 +19,7 @@ bench = false
 
 [dependencies]
 crossbeam-deque = "0.8.3"
-globset = { version = "0.4.18", path = "../globset" }
+globset = { package = "laputa-globset", version = "0.4.20", path = "../globset" }
 log = "0.4.20"
 memchr = "2.6.3"
 same-file = "1.0.6"

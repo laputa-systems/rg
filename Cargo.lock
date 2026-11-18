@@ -153,21 +153,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4eba85ea1d0a966a983acd07deee566e67395d2d96b6fb39e62b5a833f1eb0b"
 
 [[package]]
-name = "globset"
-version = "0.4.20"
-dependencies = [
- "aho-corasick",
- "arbitrary",
- "bstr",
- "glob",
- "log",
- "regex-automata",
- "regex-syntax",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "grep"
 version = "0.4.1"
 dependencies = [
@@ -186,7 +171,7 @@ name = "grep-cli"
 version = "0.1.12"
 dependencies = [
  "bstr",
- "globset",
+ "laputa-globset",
  "libc",
  "log",
  "termcolor",
@@ -250,21 +235,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ignore"
-version = "0.4.33"
-dependencies = [
- "bstr",
- "crossbeam-channel",
- "crossbeam-deque",
- "globset",
- "log",
- "memchr",
- "regex-automata",
- "same-file",
- "walkdir",
-]
-
-[[package]]
 name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -278,6 +248,36 @@ checksum = "1c00acbd29eabad4a2392fa0e921c874934dbbf4194312ad20f04a0ed67a3cb3"
 dependencies = [
  "getrandom",
  "libc",
+]
+
+[[package]]
+name = "laputa-globset"
+version = "0.4.20"
+dependencies = [
+ "aho-corasick",
+ "arbitrary",
+ "bstr",
+ "glob",
+ "log",
+ "regex-automata",
+ "regex-syntax",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "laputa-ignore"
+version = "0.4.33"
+dependencies = [
+ "bstr",
+ "crossbeam-channel",
+ "crossbeam-deque",
+ "laputa-globset",
+ "log",
+ "memchr",
+ "regex-automata",
+ "same-file",
+ "walkdir",
 ]
 
 [[package]]
@@ -407,7 +407,7 @@ dependencies = [
  "anyhow",
  "bstr",
  "grep",
- "ignore",
+ "laputa-ignore",
  "lexopt",
  "log",
  "serde",

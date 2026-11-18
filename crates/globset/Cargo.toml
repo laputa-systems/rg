@@ -1,5 +1,5 @@
 [package]
-name = "globset"
+name = "laputa-globset"
 version = "0.4.20"  #:version
 authors = ["Andrew Gallant <jamslam@gmail.com>"]
 description = """
